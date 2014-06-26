@@ -7,6 +7,10 @@
 ;; Keywords: sql
 ;; URL: https://github.com/trevoke/sqlup.el
 
+;;; Commentary:
+
+;; Activate the minor mode (M-x sqlup-mode) and type away
+
 ;; This file is not part of GNU Emacs
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -21,10 +25,6 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-;;; Commentary:
-
-;; Activate the minor mode (M-x sqlup-mode) and type away
 
 ;;; Code:
 
