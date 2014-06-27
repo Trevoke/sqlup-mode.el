@@ -3,13 +3,10 @@
 ;; Copyright (C) 2014 Aldric Giacomoni
 
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
+;; URL: https://github.com/trevoke/sqlup-mode.el
+;; Created: Jun 25 2014
 ;; Version: 0.0.1
 ;; Keywords: sql
-;; URL: https://github.com/trevoke/sqlup.el
-
-;;; Commentary:
-
-;; Activate the minor mode (M-x sqlup-mode) and type away
 
 ;; This file is not part of GNU Emacs
 
@@ -26,7 +23,9 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; Code:
+;;; Commentary:
+
+;; Activate the minor mode (M-x sqlup-mode) and type away
 
 (defun sqlup-insert-space-and-maybe-capitalize ()
   (interactive)
