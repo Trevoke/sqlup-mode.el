@@ -26,6 +26,7 @@
 ;;; Commentary:
 
 ;; Activate the minor mode (M-x sqlup-mode) and type away
+;; Alternatively, use a hook: (add-hook 'sql-mode 'sqlup-mode) 
 
 (defun sqlup-insert-space-and-maybe-capitalize ()
   (interactive)
@@ -295,8 +296,5 @@
      EXEC
      OVERLAPS
      )))
-
-;;;###autoload
-(add-hook 'sql-mode 'sqlup-mode)
 
 (provide 'sqlup-mode)
