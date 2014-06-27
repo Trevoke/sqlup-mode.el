@@ -1,4 +1,4 @@
-;; sqlup.el --- Upcase SQL words for you
+;; sqlup-mode.el --- Upcase SQL words for you
 
 ;; Copyright (C) 2014 Aldric Giacomoni
 
