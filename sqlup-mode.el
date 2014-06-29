@@ -40,7 +40,7 @@
 
 (defun sqlup-maybe-capitalize-word-at-point ()
   (interactive)
-  (setq sqlup-current-word (thing-at-point 'symbol))
+  (let (sqlup-current-word (thing-at-point 'symbol)))
   (if (member sqlup-current-word sqlup-keywords)
       (progn
         (setq sqlup-current-word-upcase (upcase sqlup-current-word))
