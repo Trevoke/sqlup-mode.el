@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Keywords: sql
 
 ;; This file is not part of GNU Emacs
@@ -26,7 +26,7 @@
 ;;; Commentary:
 
 ;; Activate the minor mode (M-x sqlup-mode) and type away
-;; Alternatively, use a hook: (add-hook 'sql-mode 'sqlup-mode) 
+;; Alternatively, use a hook: (add-hook 'sql-mode 'sqlup-mode)
 
 (defun sqlup-insert-space-and-maybe-capitalize ()
   (interactive)
@@ -39,9 +39,9 @@
   (insert "("))
 
 (defun sqlup-maybe-capitalize-word-at-point ()
+  (interactive)
   (setq sqlup-current-word (thing-at-point 'symbol))
-  (if (and (char-or-string-p sqlup-current-word)
-           (member (intern (upcase sqlup-current-word)) sqlup-keywords))
+  (if (member sqlup-current-word sqlup-keywords)
       (progn
         (setq sqlup-current-word-upcase (upcase sqlup-current-word))
         (setq sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol))
@@ -59,242 +59,7 @@
 
 (make-variable-buffer-local
  (defvar sqlup-keywords
-   '(
-     ACTION
-     ADA
-     ADD
-     ALL
-     ALLOCATE
-     ALTER
-     AND
-     ANY
-     ARE
-     AS
-     ASC
-     ASSERTION
-     AT
-     AUTHORIZATION
-     AVG
-     BEGIN
-     BETWEEN
-     BIT
-     BIT_LENGTH
-     BOTH
-     BY
-     CASCADE
-     CASCADED
-     CASE
-     CAST
-     CATALOG
-     CHAR
-     CHARACTER
-     CHARACTER_LENGTH
-     CHAR_LENGTH
-     CHECK
-     CLOSE
-     COALESCE
-     COLLATE
-     COLLATION
-     COLUMN
-     COMMIT
-     CONNECT
-     CONNECTION
-     CONSTRAINT
-     CONSTRAINTS
-     CONTINUE
-     CONVERT
-     CORRESPONDING
-     COUNT
-     CREATE
-     CROSS
-     CURRENT
-     CURRENT_DATE
-     CURRENT_TIME
-     CURRENT_TIMESTAMP
-     CURRENT_USER
-     CURSOR
-     DATE
-     DAY
-     DEALLOCATE
-     DEC
-     DECIMAL
-     DECLARE
-     DEFAULT
-     DEFERRABLE
-     DEFERRED
-     DELETE
-     DESC
-     DESCRIBE
-     DESCRIPTOR
-     DIAGNOSTICS
-     DISCONNECT
-     DISTINCT
-     DOMAIN
-     DOUBLE
-     DROP
-     ELSE
-     END
-     END-EXEC
-     ESCAPE
-     EXCEPT
-     EXCEPTION
-     EXECUTE
-     EXISTS
-     EXTERNAL
-     EXTRACT
-     FALSE
-     FETCH
-     FIRST
-     FLOAT
-     FOR
-     FOREIGN
-     FORTRAN
-     FOUND
-     FROM
-     FULL
-     GET
-     GLOBAL
-     GO
-     GOTO
-     GRANT
-     GROUP
-     HAVING
-     HOUR
-     IDENTITY
-     IMMEDIATE
-     IN
-     INCLUDE
-     INDEX
-     INDICATOR
-     INITIALLY
-     INNER
-     INPUT
-     INSENSITIVE
-     INSERT
-     INT
-     INTEGER
-     INTERSECT
-     INTERVAL
-     INTO
-     IS
-     ISOLATION
-     JOIN
-     KEY
-     LANGUAGE
-     LAST
-     LEADING
-     LEFT
-     LEVEL
-     LIKE
-     LOCAL
-     LOWER
-     MATCH
-     MAX
-     MIN
-     MINUTE
-     MODULE
-     MONTH
-     NAMES
-     NATIONAL
-     NATURAL
-     NCHAR
-     NEXT
-     NO
-     NONE
-     NOT
-     NULL
-     NULLIF
-     NUMERIC
-     OCTET_LENGTH
-     OF
-     ON
-     ONLY
-     OPEN
-     OPTION
-     OR
-     ORDER
-     OUTER
-     OUTPUT
-     PAD
-     PARTIAL
-     PASCAL
-     POSITION
-     PRECISION
-     PREPARE
-     PRESERVE
-     PRIMARY
-     PRIOR
-     PRIVILEGES
-     PROCEDURE
-     PUBLIC
-     READ
-     REAL
-     REFERENCES
-     RELATIVE
-     RESTRICT
-     REVOKE
-     RIGHT
-     ROLLBACK
-     ROWS
-     SCHEMA
-     SCROLL
-     SECOND
-     SECTION
-     SELECT
-     SESSION
-     SESSION_USER
-     SET
-     SIZE
-     SMALLINT
-     SOME
-     SPACE
-     SQL
-     SQLCA
-     SQLCODE
-     SQLERROR
-     SQLSTATE
-     SQLWARNING
-     SUBSTRING
-     SUM
-     SYSTEM_USER
-     TABLE
-     TEMPORARY
-     THEN
-     TIME
-     TIMESTAMP
-     TIMEZONE_HOUR
-     TIMEZONE_MINUTE
-     TO
-     TRAILING
-     TRANSACTION
-     TRANSLATE
-     TRANSLATION
-     TRIM
-     TRUE
-     UNION
-     UNIQUE
-     UNKNOWN
-     UPDATE
-     UPPER
-     USAGE
-     USER
-     USING
-     VALUE
-     VALUES
-     VARCHAR
-     VARYING
-     VIEW
-     WHEN
-     WHENEVER
-     WHERE
-     WITH
-     WORK
-     WRITE
-     YEAR
-     ZONE
-     ABSOLUTE
-     EXEC
-     OVERLAPS
-     )))
+   '("absolute" "action" "add" "after" "all" "allocate" "alter" "and" "any" "are" "array" "as" "asc" "asensitive" "assertion" "asymmetric" "at" "atomic" "authorization" "avg" "before" "begin" "between" "bigint" "binary" "bit" "bitlength" "blob" "boolean" "both" "breadth" "by" "call" "called" "cascade" "cascaded" "case" "cast" "catalog" "char" "char_length" "character" "character_length" "check" "clob" "close" "coalesce" "collate" "collation" "column" "commit" "condition" "connect" "connection" "constraint" "constraints" "constructor" "contains" "continue" "convert" "corresponding" "count" "create" "cross" "cube" "current" "current_date" "current_default_transform_group" "current_path" "current_role" "current_time" "current_timestamp" "current_transform_group_for_type" "current_user" "cursor" "cycle" "data" "date" "day" "deallocate" "dec" "decimal" "declare" "default" "deferrable" "deferred" "delete" "depth" "deref" "desc" "describe" "descriptor" "deterministic" "diagnostics" "disconnect" "distinct" "do" "domain" "double" "drop" "dynamic" "each" "element" "else" "elseif" "end" "equals" "escape" "except" "exception" "exec" "execute" "exists" "exit" "external" "extract" "false" "fetch" "filter" "first" "float" "for" "foreign" "found" "free" "from" "full" "function" "general" "get" "global" "go" "goto" "grant" "group" "grouping" "handler" "having" "hold" "hour" "identity" "if" "immediate" "in" "indicator" "initially" "inner" "inout" "input" "insensitive" "insert" "int" "integer" "intersect" "interval" "into" "is" "isolation" "iterate" "join" "key" "language" "large" "last" "lateral" "leading" "leave" "left" "level" "like" "local" "localtime" "localtimestamp" "locator" "loop" "lower" "map" "match" "map" "member" "merge" "method" "min" "minute" "modifies" "module" "month" "multiset" "names" "national" "natural" "nchar" "nclob" "new" "next" "no" "none" "not" "null" "nullif" "numeric" "object" "octet_length" "of" "old" "on" "only" "open" "option" "or" "order" "ordinality" "out" "outer" "output" "over" "overlaps" "pad" "parameter" "partial" "partition" "path" "position" "precision" "prepare" "preserve" "primary" "prior" "privileges" "procedure" "public" "range" "read" "reads" "real" "recursive" "ref" "references" "referencing" "relative" "release" "repeat" "resignal" "restrict" "result" "return" "returns" "revoke" "right" "role" "rollback" "rollup" "routine" "row" "rows" "savepoint" "schema" "scope" "scroll" "search" "second" "section" "select" "sensitive" "session" "session_user" "set" "sets" "signal" "similar" "size" "smallint" "some" "space" "specific" "specifictype" "sql" "sqlcode" "sqlerror" "sqlexception" "sqlstate" "sqlwarning" "start" "state" "static" "submultiset" "substring" "sum" "symmetric" "system" "system_user" "table" "tablesample" "temporary" "then" "time" "timestamp" "timezone_hour" "timezone_minute" "to" "trailing" "transaction" "translate" "translation" "treat" "trigger" "trim" "true" "under" "undo" "union" "unique" "unknown" "unnest" "until" "update" "upper" "usage" "user" "using" "value" "values" "varchar" "varying" "view" "when" "whenever" "where" "while" "window" "with" "within" "without" "work" "write" "year" "zone")
+   ))
 
 (provide 'sqlup-mode)
