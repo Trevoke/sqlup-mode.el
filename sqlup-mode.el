@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.1.1
+;; Version: 0.1.2
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -32,8 +32,8 @@
 ;; The capitalization is triggered when you press 'SPC', ';' or '('
 ;;
 ;; This mode also provides a function to capitalize SQL keywords inside a region.
-;; It is not bound to a keybinding, but it is available even without activating the mode (which might be a bug)
 ;; M-x sqlup-capitalize-keywords-in-region
+;; It is not bound to a keybinding, but here is an example of how you could do it:
 ;; (local-set-key (kbd "C-c u") 'sqlup-capitalize-keywords-in-region)
 
 ;;; Code:
@@ -67,16 +67,17 @@
 (defun sqlup-capitalize-keywords-in-region ()
   "Call this function on a region to capitalize the SQL keywords therein."
   (interactive)
-  (let* ((sqlup-start-of-region (region-beginning))
-         (sqlup-end-of-region (region-end)))
-    (progn
-      (goto-char sqlup-start-of-region)
-      (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
-        (if (member (downcase (match-string 0)) sqlup-keywords)
-            (progn
-              (message (upcase (match-string 0)))
-              (replace-match (upcase (match-string 0)) t t))))
-      (goto-char sqlup-end-of-region))))
+
+  (save-excursion
+    (let* ((sqlup-start-of-region (region-beginning))
+           (sqlup-end-of-region (region-end)))
+      (progn
+        (goto-char sqlup-start-of-region)
+        (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
+          (if (member (downcase (match-string 0)) sqlup-keywords)
+              (progn
+                (message (upcase (match-string 0)))
+                (replace-match (upcase (match-string 0)) t t))))))))
 
 ;;;###autoload
 (define-minor-mode sqlup-mode

@@ -25,4 +25,3 @@ Activate the minor mode with `M-x sqlup-mode` and you can just start typing. The
 
 ### Work with a region
 Select a region and just call `M-x sqlup-capitalize-keywords-in-region`. Magic.
-NB: It is not necessary to activate the minor mode to be able to call this function.

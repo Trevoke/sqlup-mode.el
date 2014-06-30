@@ -1,3 +1,7 @@
+### 0.1.2 (Jun 30, 2014)
+
+* Wrap sqlup-capitalize-keywords-in-region with (save-excursion &rest BODY) for the user's sanity
+
 ### 0.1.1 (Jun 30, 2014)
 
 * Add autoload cookies
