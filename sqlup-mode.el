@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.1.0
+;; Version: 0.1.1
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -63,6 +63,7 @@
           (insert (upcase sqlup-current-word))
           ))))
 
+;;;###autoload
 (defun sqlup-capitalize-keywords-in-region ()
   "Call this function on a region to capitalize the SQL keywords therein."
   (interactive)
@@ -77,6 +78,7 @@
               (replace-match (upcase (match-string 0)) t t))))
       (goto-char sqlup-end-of-region))))
 
+;;;###autoload
 (define-minor-mode sqlup-mode
   "Capitalizes SQL keywords for you."
   :lighter " SUP"
