@@ -75,9 +75,7 @@
         (goto-char sqlup-start-of-region)
         (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
           (if (member (downcase (match-string 0)) sqlup-keywords)
-              (progn
-                (message (upcase (match-string 0)))
-                (replace-match (upcase (match-string 0)) t t))))))))
+              (replace-match (upcase (match-string 0)) t t)))))))
 
 ;;;###autoload
 (define-minor-mode sqlup-mode
