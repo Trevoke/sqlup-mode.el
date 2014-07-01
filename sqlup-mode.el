@@ -53,6 +53,11 @@
   (sqlup-maybe-capitalize-word-at-point)
   (insert ";"))
 
+(defun sqlup-insert-comma-and-maybe-capitalize ()
+  (interactive)
+  (sqlup-maybe-capitalize-word-at-point)
+  (insert ","))
+
 (defun sqlup-maybe-capitalize-word-at-point ()
   (let ((sqlup-current-word (thing-at-point 'symbol))
         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
@@ -85,6 +90,7 @@
             (define-key map (kbd "SPC") 'sqlup-insert-space-and-maybe-capitalize)
             (define-key map (kbd "(") 'sqlup-insert-open-parens-and-maybe-capitalize)
             (define-key map (kbd ";") 'sqlup-insert-semicolon-and-maybe-capitalize)
+	    (define-key map (kbd ",") 'sqlup-insert-comma-and-maybe-capitalize)
             map))
 
 (defvar sqlup-keywords
