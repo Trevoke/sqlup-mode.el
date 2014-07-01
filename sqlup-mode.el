@@ -59,20 +59,23 @@
   (insert ","))
 
 (defun sqlup-maybe-capitalize-word-at-point ()
-  (let ((sqlup-current-word (thing-at-point 'symbol))
-        (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-    (if (and (stringp sqlup-current-word)
-             (member (downcase sqlup-current-word) sqlup-keywords))
-        (progn
-          (delete-region (car sqlup-current-word-boundaries) (cdr sqlup-current-word-boundaries))
-          (insert (upcase sqlup-current-word))
-          ))))
+  (if (not (sqlup-is-commentp (thing-at-point 'line)))
+      (let ((sqlup-current-word (thing-at-point 'symbol))
+            (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
+        (if (and (stringp sqlup-current-word)
+                 (member (downcase sqlup-current-word) sqlup-keywords))
+            (progn
+              (delete-region (car sqlup-current-word-boundaries)
+                             (cdr sqlup-current-word-boundaries))
+              (insert (upcase sqlup-current-word)))))))
+
+(defun sqlup-is-commentp (line)
+  (and (string-match "^\s*--.*$" line) t))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region ()
   "Call this function on a region to capitalize the SQL keywords therein."
   (interactive)
-
   (save-excursion
     (let* ((sqlup-start-of-region (region-beginning))
            (sqlup-end-of-region (region-end)))
@@ -90,7 +93,7 @@
             (define-key map (kbd "SPC") 'sqlup-insert-space-and-maybe-capitalize)
             (define-key map (kbd "(") 'sqlup-insert-open-parens-and-maybe-capitalize)
             (define-key map (kbd ";") 'sqlup-insert-semicolon-and-maybe-capitalize)
-	    (define-key map (kbd ",") 'sqlup-insert-comma-and-maybe-capitalize)
+            (define-key map (kbd ",") 'sqlup-insert-comma-and-maybe-capitalize)
             map))
 
 (defvar sqlup-keywords
