@@ -59,13 +59,15 @@
   (insert ","))
 
 (defun sqlup-maybe-capitalize-word-at-point ()
-  (let ((sqlup-current-word (thing-at-point 'symbol))
-        (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-    (if (and sqlup-current-word (sqlup-is-keywordp (downcase sqlup-current-word)))
-        (progn
-          (delete-region (car sqlup-current-word-boundaries) (cdr sqlup-current-word-boundaries))
-          (insert (upcase sqlup-current-word))
-          ))))
+  (if (not (sqlup-is-commentp (thing-at-point 'line)))
+      (let ((sqlup-current-word (thing-at-point 'symbol))
+	(sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
+    (if (and sqlup-current-word
+	     (sqlup-is-keywordp (downcase sqlup-current-word)))
+	(progn
+	  (delete-region (car sqlup-current-word-boundaries)
+			 (cdr sqlup-current-word-boundaries))
+	  (insert (upcase sqlup-current-word)))))))
 
 (defun sqlup-keywords-regexps ()
   (if (not sqlup-local-keywords-regexps)
@@ -82,6 +84,9 @@
       (setq sqlup-term (car sqlup-terms))
       (setq sqlup-terms (cdr sqlup-terms)))
     (and sqlup-keyword-found t)))
+
+(defun sqlup-is-commentp (line)
+  (and (string-match "^\s+--.*$" line) t))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region ()
