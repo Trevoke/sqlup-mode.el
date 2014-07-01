@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.1.3
+;; Version: 0.1.4
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -56,7 +56,8 @@
 (defun sqlup-maybe-capitalize-word-at-point ()
   (let ((sqlup-current-word (thing-at-point 'symbol))
         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-    (if (member (downcase sqlup-current-word) sqlup-keywords)
+    (if (and (stringp sqlup-current-word)
+             (member (downcase sqlup-current-word) sqlup-keywords))
         (progn
           (delete-region (car sqlup-current-word-boundaries) (cdr sqlup-current-word-boundaries))
           (insert (upcase sqlup-current-word))

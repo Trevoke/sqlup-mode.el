@@ -1,3 +1,7 @@
+### 0.1.4 (Jul 1, 2014)
+
+* Don't crash when checking if whitespace is a keyword
+
 ### 0.1.3 (Jun 30, 2014)
 
 * Upcase all the words! Not just the ones who started out all lowercase
