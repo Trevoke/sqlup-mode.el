@@ -56,7 +56,7 @@
 (defun sqlup-maybe-capitalize-word-at-point ()
   (let ((sqlup-current-word (thing-at-point 'symbol))
         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-    (if (member sqlup-current-word sqlup-keywords)
+    (if (member (downcase sqlup-current-word) sqlup-keywords)
         (progn
           (delete-region (car sqlup-current-word-boundaries) (cdr sqlup-current-word-boundaries))
           (insert (upcase sqlup-current-word))
