@@ -39,14 +39,17 @@
 ;;; Code:
 
 (defun sqlup-insert-space-and-maybe-capitalize ()
+  (interactive)
   (sqlup-maybe-capitalize-word-at-point)
   (insert " "))
 
 (defun sqlup-insert-open-parens-and-maybe-capitalize ()
+  (interactive)
   (sqlup-maybe-capitalize-word-at-point)
   (insert "("))
 
 (defun sqlup-insert-semicolon-and-maybe-capitalize ()
+  (interactive)
   (sqlup-maybe-capitalize-word-at-point)
   (insert ";"))
 
