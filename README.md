@@ -32,5 +32,5 @@ typing. The minor mode will be triggered by the following keys: `SPC`,
 
 ### Work with a region
 
-Select a region and just call `M-x
-sqlup-capitalize-keywords-in-region`. Magic.
+Select a region and just call `M-x sqlup-capitalize-keywords-in-region`.
+Magic.
