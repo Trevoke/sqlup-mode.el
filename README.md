@@ -27,8 +27,12 @@ sqlup-mode is NOT YET on Marmalade.
 ### Normal typing (e.g. SQL REPL)
 
 Activate the minor mode with `M-x sqlup-mode` and you can just start
-typing. The minor mode will be triggered by the following keys: `SPC`,
-`(`, `,`, and `;` .
+typing. The minor mode will be triggered by the following keys:
+* `SPC`
+* `(`
+* `,`
+* `;`
+* `\r` (Enter)
 
 ### Work with a region
 

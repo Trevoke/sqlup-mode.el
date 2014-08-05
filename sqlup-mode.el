@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.3.0
+;; Version: 0.3.1
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -29,7 +29,12 @@
 
 ;; Activate the minor mode (M-x sqlup-mode) and type away
 ;; Alternatively, use a hook: (add-hook 'sql-mode 'sqlup-mode)
-;; The capitalization is triggered when you press 'SPC', ';', '(' or '\r' (Enter)
+;; The capitalization is triggered when you press the following keys:
+;; * SPC
+;; * ,
+;; * ;
+;; * (
+;; * \r (Enter)
 ;;
 ;; This mode also provides a function to capitalize SQL keywords inside a region.
 ;; M-x sqlup-capitalize-keywords-in-region
@@ -72,7 +77,7 @@
   (string= "self-insert-command" (symbol-name this-command)))
 
 (defun sqlup-trigger-self-insert-characterp ()
-  (let ((trigger-characters '(?\; ?\  ?\( )) ;; _?\ _ is "space"
+  (let ((trigger-characters '(?\; ?\  ?\( ?\,)) ;; _?\ _ is 'SPC'
         (current-char (elt (this-command-keys-vector) 0)))
     (member current-char trigger-characters)))
 
@@ -98,7 +103,8 @@
   (let* ((sqlup-keyword-found nil)
         (sqlup-terms (sqlup-keywords-regexps))
         (sqlup-term (car sqlup-terms)))
-    (while (and (not sqlup-keyword-found) sqlup-terms)
+    (while (and (not sqlup-keyword-found)
+                sqlup-terms)
       (setq sqlup-keyword-found (string-match sqlup-term word))
       (setq sqlup-term (car sqlup-terms))
       (setq sqlup-terms (cdr sqlup-terms)))
