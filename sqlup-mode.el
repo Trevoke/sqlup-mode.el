@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.2.0
+;; Version: 0.3.0
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -39,17 +39,12 @@
 ;;; Code:
 
 ;;;###autoload
-(defun sqlup-capitalize-keywords-in-region ()
-  "Call this function on a region to capitalize the SQL keywords therein."
-  (interactive)
-  (save-excursion
-    (let* ((sqlup-start-of-region (region-beginning))
-           (sqlup-end-of-region (region-end)))
-      (progn
-        (goto-char sqlup-start-of-region)
-        (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
-          (if (member (downcase (match-string 0)) sqlup-keywords)
-              (replace-match (upcase (match-string 0)) t t)))))))
+(define-minor-mode sqlup-mode
+  "Capitalizes SQL keywords for you."
+  :lighter " SUP"
+  (if sqlup-mode
+      (sqlup-enable-keyword-capitalization)
+    (sqlup-disable-keyword-capitalization)))
 
 (defun sqlup-enable-keyword-capitalization ()
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
@@ -67,6 +62,9 @@
       (and (sqlup-user-is-typingp)
            (sqlup-trigger-self-insert-characterp))))
 
+(defun sqlup-is-commentp (line)
+  (and (string-match "^\s*--.*$" line) t))
+
 (defun sqlup-user-pressed-returnp ()
   (equal 13 (elt (this-command-keys-vector) 0)))
 
@@ -78,33 +76,49 @@
         (current-char (elt (this-command-keys-vector) 0)))
     (member current-char trigger-characters)))
 
-(defun sqlup-is-commentp (line)
-  (and (string-match "^\s*--.*$" line) t))
-
 (defun sqlup-maybe-capitalize-word-at-point ()
   (save-excursion
-    (backward-word) ;; hack: am inside post-self-command-hook
+    (backward-word) ;; hack: inside post-self-command hook
+    ;; TODO - DRY logic with the area upcasing.
     (let ((sqlup-current-word (thing-at-point 'symbol))
-          (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-      (if (and (stringp sqlup-current-word)
-               (member (downcase sqlup-current-word) sqlup-keywords))
-          (progn
-            (delete-region (car sqlup-current-word-boundaries)
-                           (cdr sqlup-current-word-boundaries))
-            (insert (upcase sqlup-current-word)))))))
+         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
+     (if (and sqlup-current-word (sqlup-is-keywordp (downcase sqlup-current-word)))
+         (progn
+           (delete-region (car sqlup-current-word-boundaries)
+                          (cdr sqlup-current-word-boundaries))
+           (insert (upcase sqlup-current-word)))))))
 
+(defun sqlup-keywords-regexps ()
+  (if (not sqlup-local-keywords-regexps)
+      (setq-local sqlup-local-keywords-regexps
+                  (mapcar 'car (sql-add-product-keywords 'ansi '()))))
+  sqlup-local-keywords-regexps)
+
+(defun sqlup-is-keywordp (word)
+  (let* ((sqlup-keyword-found nil)
+        (sqlup-terms (sqlup-keywords-regexps))
+        (sqlup-term (car sqlup-terms)))
+    (while (and (not sqlup-keyword-found) sqlup-terms)
+      (setq sqlup-keyword-found (string-match sqlup-term word))
+      (setq sqlup-term (car sqlup-terms))
+      (setq sqlup-terms (cdr sqlup-terms)))
+    (and sqlup-keyword-found t)))
 
 ;;;###autoload
-(define-minor-mode sqlup-mode
-  "Capitalizes SQL keywords for you."
-  :lighter " SUP"
-  (if sqlup-mode
-      (sqlup-enable-keyword-capitalization)
-    (sqlup-disable-keyword-capitalization)))
+(defun sqlup-capitalize-keywords-in-region ()
+  "Call this function on a region to capitalize the SQL keywords therein."
+  (interactive)
+  (save-excursion
+    (let* ((sqlup-start-of-region (region-beginning))
+           (sqlup-end-of-region (region-end)))
+      (progn
+        (goto-char sqlup-start-of-region)
+        (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
+          (if (member (downcase (match-string 0)) sqlup-keywords)
+              (replace-match (upcase (match-string 0)) t t)))))))
 
-(defvar sqlup-keywords
-  '("absolute" "action" "add" "after" "all" "allocate" "alter" "and" "any" "are" "array" "as" "asc" "asensitive" "assertion" "asymmetric" "at" "atomic" "authorization" "avg" "before" "begin" "between" "bigint" "binary" "bit" "bitlength" "blob" "boolean" "both" "breadth" "by" "call" "called" "cascade" "cascaded" "case" "cast" "catalog" "char" "char_length" "character" "character_length" "check" "clob" "close" "coalesce" "collate" "collation" "column" "commit" "condition" "connect" "connection" "constraint" "constraints" "constructor" "contains" "continue" "convert" "corresponding" "count" "create" "cross" "cube" "current" "current_date" "current_default_transform_group" "current_path" "current_role" "current_time" "current_timestamp" "current_transform_group_for_type" "current_user" "cursor" "cycle" "data" "date" "day" "deallocate" "dec" "decimal" "declare" "default" "deferrable" "deferred" "delete" "depth" "deref" "desc" "describe" "descriptor" "deterministic" "diagnostics" "disconnect" "distinct" "do" "domain" "double" "drop" "dynamic" "each" "element" "else" "elseif" "end" "equals" "escape" "except" "exception" "exec" "execute" "exists" "exit" "external" "extract" "false" "fetch" "filter" "first" "float" "for" "foreign" "found" "free" "from" "full" "function" "general" "get" "global" "go" "goto" "grant" "group" "grouping" "handler" "having" "hold" "hour" "identity" "if" "immediate" "in" "indicator" "initially" "inner" "inout" "input" "insensitive" "insert" "int" "integer" "intersect" "interval" "into" "is" "isolation" "iterate" "join" "key" "language" "large" "last" "lateral" "leading" "leave" "left" "level" "like" "limit" "local" "localtime" "localtimestamp" "locator" "loop" "lower" "map" "match" "map" "member" "merge" "method" "min" "minute" "modifies" "module" "month" "multiset" "names" "national" "natural" "nchar" "nclob" "new" "next" "no" "none" "not" "null" "nullif" "numeric" "object" "octet_length" "of" "old" "on" "only" "open" "option" "or" "order" "ordinality" "out" "outer" "output" "over" "overlaps" "pad" "parameter" "partial" "partition" "path" "position" "precision" "prepare" "preserve" "primary" "prior" "privileges" "procedure" "public" "range" "read" "reads" "real" "recursive" "ref" "references" "referencing" "relative" "release" "repeat" "resignal" "restrict" "result" "return" "returns" "revoke" "right" "role" "rollback" "rollup" "routine" "row" "rows" "savepoint" "schema" "scope" "scroll" "search" "second" "section" "select" "sensitive" "session" "session_user" "set" "sets" "signal" "similar" "size" "smallint" "some" "space" "specific" "specifictype" "sql" "sqlcode" "sqlerror" "sqlexception" "sqlstate" "sqlwarning" "start" "state" "static" "submultiset" "substring" "sum" "symmetric" "system" "system_user" "table" "tablesample" "temporary" "then" "time" "timestamp" "timezone_hour" "timezone_minute" "to" "trailing" "transaction" "translate" "translation" "treat" "trigger" "trim" "true" "under" "undo" "union" "unique" "unknown" "unnest" "until" "update" "upper" "usage" "user" "using" "value" "values" "varchar" "varying" "view" "when" "whenever" "where" "while" "window" "with" "within" "without" "work" "write" "year" "zone")
-  "This is a list of SQL keywords from the SQL standard"
-  )
+(defvar sqlup-local-keywords-regexps nil
+  "Buffer local variable holding regexps from sql-mode to
+identify keywords.")
 
 (provide 'sqlup-mode)
