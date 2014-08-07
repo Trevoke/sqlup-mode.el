@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.3.1
+;; Version: 0.4.0
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -68,7 +68,9 @@
            (sqlup-trigger-self-insert-characterp))))
 
 (defun sqlup-is-commentp (line)
-  (and (string-match "^\s*--.*$" line) t))
+  (and line
+       (string-match "^\s*--.*$" line)
+       t))
 
 (defun sqlup-user-pressed-returnp ()
   (equal 13 (elt (this-command-keys-vector) 0)))
@@ -86,29 +88,13 @@
     (backward-word) ;; hack: inside post-self-command hook
     ;; TODO - DRY logic with the area upcasing.
     (let ((sqlup-current-word (thing-at-point 'symbol))
-         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-     (if (and sqlup-current-word (sqlup-is-keywordp (downcase sqlup-current-word)))
+          (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
+      (if (and sqlup-current-word
+               (sqlup-is-keywordp (downcase sqlup-current-word)))
          (progn
            (delete-region (car sqlup-current-word-boundaries)
                           (cdr sqlup-current-word-boundaries))
            (insert (upcase sqlup-current-word)))))))
-
-(defun sqlup-keywords-regexps ()
-  (if (not sqlup-local-keywords-regexps)
-      (setq-local sqlup-local-keywords-regexps
-                  (mapcar 'car (sql-add-product-keywords 'ansi '()))))
-  sqlup-local-keywords-regexps)
-
-(defun sqlup-is-keywordp (word)
-  (let* ((sqlup-keyword-found nil)
-        (sqlup-terms (sqlup-keywords-regexps))
-        (sqlup-term (car sqlup-terms)))
-    (while (and (not sqlup-keyword-found)
-                sqlup-terms)
-      (setq sqlup-keyword-found (string-match sqlup-term word))
-      (setq sqlup-term (car sqlup-terms))
-      (setq sqlup-terms (cdr sqlup-terms)))
-    (and sqlup-keyword-found t)))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region ()
@@ -120,8 +106,30 @@
       (progn
         (goto-char sqlup-start-of-region)
         (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
-          (if (member (downcase (match-string 0)) sqlup-keywords)
+          (if (sqlup-is-keywordp (downcase (match-string 0)))
               (replace-match (upcase (match-string 0)) t t)))))))
+
+(defun sqlup-keywords-regexps ()
+  (if (not sqlup-local-keywords-regexps)
+      (setq-local sqlup-local-keywords-regexps
+                  (sqlup-find-correct-keywords)))
+  sqlup-local-keywords-regexps)
+
+(defun sqlup-find-correct-keywords ()
+  (if (boundp 'sql-mode-font-lock-keywords)
+      (mapcar 'car sql-mode-font-lock-keywords)
+    (mapcar 'car (sql-add-product-keywords 'ansi '()))))
+
+(defun sqlup-is-keywordp (word)
+  (let* ((sqlup-keyword-found nil)
+        (sqlup-terms (sqlup-keywords-regexps))
+        (sqlup-term (car sqlup-terms)))
+    (while (and (not sqlup-keyword-found)
+                sqlup-terms)
+      (setq sqlup-keyword-found (string-match sqlup-term word))
+      (setq sqlup-term (car sqlup-terms))
+      (setq sqlup-terms (cdr sqlup-terms)))
+    (and sqlup-keyword-found t)))
 
 (defvar sqlup-local-keywords-regexps nil
   "Buffer local variable holding regexps from sql-mode to
