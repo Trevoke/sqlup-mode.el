@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.4.1
+;; Version: 0.4.2
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -36,10 +36,19 @@
 ;; * (
 ;; * \r (Enter)
 ;;
-;; This mode also provides a function to capitalize SQL keywords inside a region.
+;; This package also provides a function to capitalize SQL keywords inside a region - always available, no need to activate the minor mode to use it:
+;;
 ;; M-x sqlup-capitalize-keywords-in-region
+;;
 ;; It is not bound to a keybinding, but here is an example of how you could do it:
-;; (local-set-key (kbd "C-c u") 'sqlup-capitalize-keywords-in-region)
+;;
+;; (global-set-key (kbd "C-c u") 'sqlup-capitalize-keywords-in-region)
+;;
+;; Here follows an example setup to activate `sqlup-mode` automatically when entering sql-mode or sql-interactive-mode:
+;;
+;; (add-hook 'sql-mode-hook 'sqlup-mode)
+;; (add-hook 'sql-interactive-mode-hook 'sqlup-mode)
+
 
 ;;; Code:
 
@@ -52,12 +61,15 @@
     (sqlup-disable-keyword-capitalization)))
 
 (defun sqlup-enable-keyword-capitalization ()
+  "Add buffer-local hook to handle this mode's logic"
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
+  "Remove buffer-local hook to handle this mode's logic"
   (remove-hook 'post-command-hook 'sqlup-capitalize-as-you-type t))
 
 (defun sqlup-capitalize-as-you-type ()
+  "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
   (if (and (sqlup-should-trigger-upcasingp)
            (not (sqlup-is-commentp (thing-at-point 'line))))
       (sqlup-maybe-capitalize-last-word-typed)))
@@ -88,7 +100,6 @@
     (backward-word)
     (sqlup-work-on-word-at-point)))
 
-
 (defun sqlup-work-on-word-at-point ()
   (let ((sqlup-current-word (thing-at-point 'symbol t))
         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
@@ -117,6 +128,7 @@
   sqlup-local-keywords-regexps)
 
 (defun sqlup-find-correct-keywords ()
+  "If emacs is handling the logic for syntax highlighting of SQL keywords, then we piggyback on top of that logic. If not, we use an sql-mode function to create a list of regular expressions and use that."
   (if (boundp 'sql-mode-font-lock-keywords)
       (mapcar 'car sql-mode-font-lock-keywords)
     (mapcar 'car (sql-add-product-keywords 'ansi '()))))

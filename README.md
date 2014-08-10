@@ -22,7 +22,16 @@ sqlup-mode is on MELPA.
 
 sqlup-mode is NOT YET on Marmalade.
 
-## Basic Usage
+## Usage
+
+### Setup
+
+Here follows an example setup to activate `sqlup-mode` automatically when entering sql-mode or sql-interactive-mode:
+
+``` lisp
+(add-hook 'sql-mode-hook 'sqlup-mode)
+(add-hook 'sql-interactive-mode-hook 'sqlup-mode)
+```
 
 ### Normal typing (e.g. SQL REPL)
 
@@ -38,3 +47,8 @@ typing. The minor mode will be triggered by the following keys:
 
 Select a region and just call `M-x sqlup-capitalize-keywords-in-region`.
 Magic.
+
+
+## Implementation choices
+
+I made the choice of only triggering the word-scanning when a particular keypress happens specifically because I don't want to see the word "ORde" typed when I'm typing "ORDER", and I didn't know a *simple* way to do it. I believe that in practice, this is good enough.
