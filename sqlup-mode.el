@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.4.0
+;; Version: 0.4.1
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -60,7 +60,7 @@
 (defun sqlup-capitalize-as-you-type ()
   (if (and (sqlup-should-trigger-upcasingp)
            (not (sqlup-is-commentp (thing-at-point 'line))))
-      (sqlup-maybe-capitalize-word-at-point)))
+      (sqlup-maybe-capitalize-last-word-typed)))
 
 (defun sqlup-should-trigger-upcasingp ()
   (or (sqlup-user-pressed-returnp)
@@ -79,22 +79,25 @@
   (string= "self-insert-command" (symbol-name this-command)))
 
 (defun sqlup-trigger-self-insert-characterp ()
-  (let ((trigger-characters '(?\; ?\  ?\( ?\,)) ;; _?\ _ is 'SPC'
-        (current-char (elt (this-command-keys-vector) 0)))
-    (member current-char trigger-characters)))
+  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; _?\ _ is 'SPC'
+        (sqlup-current-char (elt (this-command-keys-vector) 0)))
+    (member sqlup-current-char sqlup-trigger-characters)))
 
-(defun sqlup-maybe-capitalize-word-at-point ()
+(defun sqlup-maybe-capitalize-last-word-typed ()
   (save-excursion
-    (backward-word) ;; hack: inside post-self-command hook
-    ;; TODO - DRY logic with the area upcasing.
-    (let ((sqlup-current-word (thing-at-point 'symbol))
-          (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-      (if (and sqlup-current-word
-               (sqlup-is-keywordp (downcase sqlup-current-word)))
-         (progn
-           (delete-region (car sqlup-current-word-boundaries)
-                          (cdr sqlup-current-word-boundaries))
-           (insert (upcase sqlup-current-word)))))))
+    (backward-word)
+    (sqlup-work-on-word-at-point)))
+
+
+(defun sqlup-work-on-word-at-point ()
+  (let ((sqlup-current-word (thing-at-point 'symbol t))
+        (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
+    (if (and sqlup-current-word
+             (sqlup-is-keywordp (downcase sqlup-current-word)))
+        (progn
+          (delete-region (car sqlup-current-word-boundaries)
+                         (cdr sqlup-current-word-boundaries))
+          (insert (upcase sqlup-current-word))))))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region ()
@@ -103,11 +106,9 @@
   (save-excursion
     (let* ((sqlup-start-of-region (region-beginning))
            (sqlup-end-of-region (region-end)))
-      (progn
         (goto-char sqlup-start-of-region)
         (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
-          (if (sqlup-is-keywordp (downcase (match-string 0)))
-              (replace-match (upcase (match-string 0)) t t)))))))
+          (sqlup-work-on-word-at-point)))))
 
 (defun sqlup-keywords-regexps ()
   (if (not sqlup-local-keywords-regexps)
@@ -122,8 +123,8 @@
 
 (defun sqlup-is-keywordp (word)
   (let* ((sqlup-keyword-found nil)
-        (sqlup-terms (sqlup-keywords-regexps))
-        (sqlup-term (car sqlup-terms)))
+         (sqlup-terms (sqlup-keywords-regexps))
+         (sqlup-term (car sqlup-terms)))
     (while (and (not sqlup-keyword-found)
                 sqlup-terms)
       (setq sqlup-keyword-found (string-match sqlup-term word))
