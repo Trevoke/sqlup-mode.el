@@ -79,13 +79,9 @@
       (and (sqlup-user-is-typingp)
            (sqlup-trigger-self-insert-characterp))))
 
-(defun sqlup-is-commentp (line)
-  (and line
-       (string-match "^\s*--.*$" line)
-       t))
-
 (defun sqlup-user-pressed-returnp ()
-  (equal 13 (elt (this-command-keys-vector) 0)))
+  (and (> 0 (length (this-command-keys-vector)))
+   (equal 13 (elt (this-command-keys-vector) 0))))
 
 (defun sqlup-user-is-typingp ()
   (string= "self-insert-command" (symbol-name this-command)))
@@ -94,6 +90,11 @@
   (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; _?\ _ is 'SPC'
         (sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
+
+(defun sqlup-is-commentp (line)
+  (and line
+       (string-match "^\s*--.*$" line)
+       t))
 
 (defun sqlup-maybe-capitalize-last-word-typed ()
   (save-excursion
