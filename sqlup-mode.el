@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.4.3
+;; Version: 0.4.4
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -106,7 +106,7 @@
   (sqlup-work-on-symbol-at-point))
 
 (defun sqlup-work-on-symbol-at-point ()
-  (let ((sqlup-current-word (thing-at-point 'symbol t))
+  (let ((sqlup-current-word (thing-at-point 'symbol))
         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
     (if (and sqlup-current-word
              (sqlup-is-keywordp (downcase sqlup-current-word)))
