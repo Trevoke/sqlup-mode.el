@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.4.2
+;; Version: 0.4.3
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -72,7 +72,7 @@
   "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
   (if (and (sqlup-should-trigger-upcasingp)
            (not (sqlup-is-commentp (thing-at-point 'line))))
-      (sqlup-maybe-capitalize-last-word-typed)))
+      (sqlup-maybe-capitalize-last-symbol)))
 
 (defun sqlup-should-trigger-upcasingp ()
   (or (sqlup-user-pressed-returnp)
@@ -81,7 +81,7 @@
 
 (defun sqlup-user-pressed-returnp ()
   (and (> 0 (length (this-command-keys-vector)))
-   (equal 13 (elt (this-command-keys-vector) 0))))
+       (equal 13 (elt (this-command-keys-vector) 0))))
 
 (defun sqlup-user-is-typingp ()
   (string= "self-insert-command" (symbol-name this-command)))
@@ -96,12 +96,16 @@
        (string-match "^\s*--.*$" line)
        t))
 
-(defun sqlup-maybe-capitalize-last-word-typed ()
+(defun sqlup-maybe-capitalize-last-symbol ()
   (save-excursion
-    (backward-word)
-    (sqlup-work-on-word-at-point)))
+    (forward-symbol -1)
+    (sqlup-work-on-symbol-at-point)))
 
-(defun sqlup-work-on-word-at-point ()
+(defun sqlup-maybe-capitalize-next-symbol ()
+  (forward-symbol 1)
+  (sqlup-work-on-symbol-at-point))
+
+(defun sqlup-work-on-symbol-at-point ()
   (let ((sqlup-current-word (thing-at-point 'symbol t))
         (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
     (if (and sqlup-current-word
@@ -112,20 +116,17 @@
           (insert (upcase sqlup-current-word))))))
 
 ;;;###autoload
-(defun sqlup-capitalize-keywords-in-region ()
+(defun sqlup-capitalize-keywords-in-region (start-pos end-pos)
   "Call this function on a region to capitalize the SQL keywords therein."
-  (interactive)
+  (interactive "r")
   (save-excursion
-    (let* ((sqlup-start-of-region (region-beginning))
-           (sqlup-end-of-region (region-end)))
-        (goto-char sqlup-start-of-region)
-        (while (search-forward-regexp "[[:alpha:]_]+" sqlup-end-of-region t)
-          (sqlup-work-on-word-at-point)))))
+    (goto-char start-pos)
+    (while (< (point) end-pos)
+      (sqlup-maybe-capitalize-next-symbol))))
 
 (defun sqlup-keywords-regexps ()
   (if (not sqlup-local-keywords-regexps)
-      (setq-local sqlup-local-keywords-regexps
-                  (sqlup-find-correct-keywords)))
+      (setq-local sqlup-local-keywords-regexps (sqlup-find-correct-keywords)))
   sqlup-local-keywords-regexps)
 
 (defun sqlup-find-correct-keywords ()
