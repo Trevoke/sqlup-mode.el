@@ -1,3 +1,42 @@
+# CHANGELOG
+
+### 0.4.4 (Aug 13, 2014)
+
+* Fix compatibility with emacs 24.3 and older thing-at-point functionality
+
+### 0.4.3 (Aug 13, 2014)
+
+* Refactors
+* Increase consistency of language, internally. Use the `symbol` instead of `word`
+
+### 0.4.2 (Aug 10, 2014)
+
+* Add documentation
+
+### 0.4.1 (Aug 10, 2014)
+
+* Fix region-upcasing logic
+
+### 0.4.0 (Aug 7, 2014)
+
+* Use sql-mode font-lock keywords if available, otherwise use default ANSI keywords
+
+### 0.3.1 (Aug 5, 2014)
+
+* Accidentally removed triggering on `,`
+* Update documentation
+
+### 0.3.0 (Aug 4, 2014)
+
+* Use sql-mode's font-lock keywords
+
+### 0.2.0 (Aug 2, 2014)
+
+* Trigger when pressing RETURN
+* Trigger when pressing `,`
+* Don't trigger when inside a single-line comment prefixed by `--`
+* Switch to post-command-hook
+
 ### 0.1.4 (Jul 1, 2014)
 
 * Don't crash when checking if whitespace is a keyword
