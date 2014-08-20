@@ -71,7 +71,7 @@
 (defun sqlup-capitalize-as-you-type ()
   "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
   (if (and (sqlup-should-do-workp)
-           (not (sqlup-is-commentp (thing-at-point 'line))))
+           (not (sqlup-commentp (thing-at-point 'line))))
       (sqlup-maybe-capitalize-last-symbol)))
 
 (defun sqlup-should-do-workp ()
@@ -91,7 +91,7 @@
         (sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
-(defun sqlup-is-commentp (line)
+(defun sqlup-commentp (line)
   (and line
        (string-match "^\s*--.*$" line)
        t))
@@ -99,21 +99,19 @@
 (defun sqlup-maybe-capitalize-last-symbol ()
   (save-excursion
     (forward-symbol -1)
-    (sqlup-work-on-symbol-at-point)))
+    (sqlup-work-on-symbol (thing-at-point 'symbol) (bounds-of-thing-at-point 'symbol))))
 
 (defun sqlup-maybe-capitalize-next-symbol ()
   (forward-symbol 1)
-  (sqlup-work-on-symbol-at-point))
+  (sqlup-work-on-symbol (thing-at-point 'symbol) (bounds-of-thing-at-point 'symbol)))
 
-(defun sqlup-work-on-symbol-at-point ()
-  (let ((sqlup-current-word (thing-at-point 'symbol))
-        (sqlup-current-word-boundaries (bounds-of-thing-at-point 'symbol)))
-    (if (and sqlup-current-word
-             (sqlup-is-keywordp (downcase sqlup-current-word)))
-        (progn
-          (delete-region (car sqlup-current-word-boundaries)
-                         (cdr sqlup-current-word-boundaries))
-          (insert (upcase sqlup-current-word))))))
+(defun sqlup-work-on-symbol (symbol symbol-boundaries)
+  (if (and symbol
+           (sqlup-is-keywordp (downcase symbol)))
+      (progn
+        (delete-region (car symbol-boundaries)
+                       (cdr symbol-boundaries))
+        (insert (upcase symbol)))))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region (start-pos end-pos)
