@@ -70,9 +70,10 @@
 
 (defun sqlup-capitalize-as-you-type ()
   "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
-  (if (and (sqlup-should-do-workp)
-           (not (sqlup-commentp (thing-at-point 'line))))
-      (sqlup-maybe-capitalize-last-symbol)))
+  (save-excursion
+    (if (and (sqlup-should-do-workp)
+             (not (sqlup-commentp (thing-at-point 'line))))
+        (sqlup-maybe-capitalize-last-symbol))))
 
 (defun sqlup-should-do-workp ()
   (or (sqlup-user-pressed-returnp)
@@ -97,9 +98,8 @@
        t))
 
 (defun sqlup-maybe-capitalize-last-symbol ()
-  (save-excursion
-    (forward-symbol -1)
-    (sqlup-work-on-symbol (thing-at-point 'symbol) (bounds-of-thing-at-point 'symbol))))
+  (forward-symbol -1)
+  (sqlup-work-on-symbol (thing-at-point 'symbol) (bounds-of-thing-at-point 'symbol)))
 
 (defun sqlup-maybe-capitalize-next-symbol ()
   (forward-symbol 1)
@@ -107,11 +107,22 @@
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
-           (sqlup-is-keywordp (downcase symbol)))
+           (not (sqlup-quotedp (car symbol-boundaries)
+                               (cdr symbol-boundaries)))
+           (sqlup-keywordp (downcase symbol)))
       (progn
         (delete-region (car symbol-boundaries)
                        (cdr symbol-boundaries))
         (insert (upcase symbol)))))
+
+(defun sqlup-quotedp (symbol-start-pos symbol-end-pos)
+  (interactive)
+  (let ((sqlup-first-char (buffer-substring-no-properties (- symbol-start-pos 1) symbol-start-pos))
+        (sqlup-last-char (buffer-substring-no-properties symbol-end-pos (+ symbol-end-pos 1))))
+    (progn
+      (and (string= sqlup-first-char sqlup-last-char)
+           (or (string= "`" sqlup-first-char)
+               (string= "\"" sqlup-first-char))))))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region (start-pos end-pos)
@@ -133,7 +144,7 @@
       (mapcar 'car sql-mode-font-lock-keywords)
     (mapcar 'car (sql-add-product-keywords 'ansi '()))))
 
-(defun sqlup-is-keywordp (word)
+(defun sqlup-keywordp (word)
   (let* ((sqlup-keyword-found nil)
          (sqlup-terms (sqlup-keywords-regexps))
          (sqlup-term (car sqlup-terms)))
