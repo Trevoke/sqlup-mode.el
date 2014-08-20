@@ -70,11 +70,11 @@
 
 (defun sqlup-capitalize-as-you-type ()
   "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
-  (if (and (sqlup-should-trigger-upcasingp)
+  (if (and (sqlup-should-do-workp)
            (not (sqlup-is-commentp (thing-at-point 'line))))
       (sqlup-maybe-capitalize-last-symbol)))
 
-(defun sqlup-should-trigger-upcasingp ()
+(defun sqlup-should-do-workp ()
   (or (sqlup-user-pressed-returnp)
       (and (sqlup-user-is-typingp)
            (sqlup-trigger-self-insert-characterp))))
