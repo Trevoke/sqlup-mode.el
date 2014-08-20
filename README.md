@@ -1,4 +1,4 @@
-# slqup-mode
+# sqlup-mode
 
 `sqlup-mode` is a minor mode for emacs. Its sole purpose is to make
 your life easier when writing SQL.

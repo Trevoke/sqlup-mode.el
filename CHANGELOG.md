@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.4.5 (Aug 20, 2014)
+
+* Do not upcase keywords surrounded by backticks or double-quotes
+
 ### 0.4.4 (Aug 13, 2014)
 
 * Fix compatibility with emacs 24.3 and older thing-at-point functionality
