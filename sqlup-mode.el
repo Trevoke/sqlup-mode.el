@@ -147,13 +147,16 @@
 (defun sqlup-keywordp (word)
   (let* ((sqlup-keyword-found nil)
          (sqlup-terms (sqlup-keywords-regexps))
-         (sqlup-term (car sqlup-terms)))
-    (while (and (not sqlup-keyword-found)
-                sqlup-terms)
-      (setq sqlup-keyword-found (string-match sqlup-term word))
-      (setq sqlup-term (car sqlup-terms))
-      (setq sqlup-terms (cdr sqlup-terms)))
-    (and sqlup-keyword-found t)))
+         (sqlup-term (car sqlup-terms))
+         (temp-syntax (make-syntax-table)))
+    (modify-syntax-entry ?_ "w" temp-syntax)
+    (with-syntax-table temp-syntax
+      (while (and (not sqlup-keyword-found)
+                  sqlup-terms)
+        (setq sqlup-keyword-found (string-match sqlup-term word))
+        (setq sqlup-term (car sqlup-terms))
+        (setq sqlup-terms (cdr sqlup-terms)))
+      (and sqlup-keyword-found t))))
 
 (defvar sqlup-local-keywords-regexps nil
   "Buffer local variable holding regexps from sql-mode to
