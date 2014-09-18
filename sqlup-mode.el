@@ -140,9 +140,10 @@
 
 (defun sqlup-find-correct-keywords ()
   "If emacs is handling the logic for syntax highlighting of SQL keywords, then we piggyback on top of that logic. If not, we use an sql-mode function to create a list of regular expressions and use that."
-  (if (boundp 'sql-mode-font-lock-keywords)
+  (if (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords)
       (mapcar 'car sql-mode-font-lock-keywords)
-    (mapcar 'car (sql-add-product-keywords 'ansi '()))))
+    (mapcar 'car (sql-add-product-keywords
+                  (or (and (boundp 'sql-product) sql-product) 'ansi) '()))))
 
 (defun sqlup-keywordp (word)
   (let* ((sqlup-keyword-found nil)
