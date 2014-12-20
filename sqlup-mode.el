@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.4.5
+;; Version: 0.5.0
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -72,13 +72,13 @@
   "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
   (save-excursion
     (if (and (sqlup-should-do-workp)
-             (not (sqlup-commentp (thing-at-point 'line))))
-        (sqlup-maybe-capitalize-last-symbol))))
+	     (not (sqlup-commentp (thing-at-point 'line))))
+	(sqlup-maybe-capitalize-last-symbol))))
 
 (defun sqlup-should-do-workp ()
   (or (sqlup-user-pressed-returnp)
       (and (sqlup-user-is-typingp)
-           (sqlup-trigger-self-insert-characterp))))
+	   (sqlup-trigger-self-insert-characterp))))
 
 (defun sqlup-user-pressed-returnp ()
   (and (> 0 (length (this-command-keys-vector)))
@@ -89,13 +89,13 @@
 
 (defun sqlup-trigger-self-insert-characterp ()
   (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; _?\ _ is 'SPC'
-        (sqlup-current-char (elt (this-command-keys-vector) 0)))
+	(sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
 (defun sqlup-commentp (line)
-  (and line
-       (string-match "^\s*--.*$" line)
-       t))
+  (and
+   (nth 4 (syntax-ppss))
+   t))
 
 (defun sqlup-maybe-capitalize-last-symbol ()
   (forward-symbol -1)
@@ -107,22 +107,18 @@
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
-           (not (sqlup-quotedp (car symbol-boundaries)
-                               (cdr symbol-boundaries)))
-           (sqlup-keywordp (downcase symbol)))
+	   (not (sqlup-quotedp (car symbol-boundaries)
+			       (cdr symbol-boundaries)))
+	   (sqlup-keywordp (downcase symbol)))
       (progn
-        (delete-region (car symbol-boundaries)
-                       (cdr symbol-boundaries))
-        (insert (upcase symbol)))))
+	(delete-region (car symbol-boundaries)
+		       (cdr symbol-boundaries))
+	(insert (upcase symbol)))))
 
 (defun sqlup-quotedp (symbol-start-pos symbol-end-pos)
-  (interactive)
-  (let ((sqlup-first-char (buffer-substring-no-properties (- symbol-start-pos 1) symbol-start-pos))
-        (sqlup-last-char (buffer-substring-no-properties symbol-end-pos (+ symbol-end-pos 1))))
-    (progn
-      (and (string= sqlup-first-char sqlup-last-char)
-           (or (string= "`" sqlup-first-char)
-               (string= "\"" sqlup-first-char))))))
+  (and
+   (nth 3 (syntax-ppss))
+   t))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region (start-pos end-pos)
@@ -143,20 +139,20 @@
   (if (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords)
       (mapcar 'car sql-mode-font-lock-keywords)
     (mapcar 'car (sql-add-product-keywords
-                  (or (and (boundp 'sql-product) sql-product) 'ansi) '()))))
+		  (or (and (boundp 'sql-product) sql-product) 'ansi) '()))))
 
 (defun sqlup-keywordp (word)
   (let* ((sqlup-keyword-found nil)
-         (sqlup-terms (sqlup-keywords-regexps))
-         (sqlup-term (car sqlup-terms))
-         (temp-syntax (make-syntax-table)))
+	 (sqlup-terms (sqlup-keywords-regexps))
+	 (sqlup-term (car sqlup-terms))
+	 (temp-syntax (make-syntax-table)))
     (modify-syntax-entry ?_ "w" temp-syntax)
     (with-syntax-table temp-syntax
       (while (and (not sqlup-keyword-found)
-                  sqlup-terms)
-        (setq sqlup-keyword-found (string-match sqlup-term word))
-        (setq sqlup-term (car sqlup-terms))
-        (setq sqlup-terms (cdr sqlup-terms)))
+		  sqlup-terms)
+	(setq sqlup-keyword-found (string-match sqlup-term word))
+	(setq sqlup-term (car sqlup-terms))
+	(setq sqlup-terms (cdr sqlup-terms)))
       (and sqlup-keyword-found t))))
 
 (defvar sqlup-local-keywords-regexps nil
