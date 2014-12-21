@@ -16,7 +16,7 @@ really.
 
 ### MELPA
 
-sqlup-mode is on MELPA.
+[![MELPA](http://melpa.org/packages/sqlup-mode-badge.svg)](http://melpa.org/#/sqlup-mode)
 
 ### Marmalade
 
