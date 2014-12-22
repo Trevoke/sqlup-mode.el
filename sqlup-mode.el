@@ -70,12 +70,11 @@
 
 (defun sqlup-capitalize-as-you-type ()
   "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
-  (save-excursion
-    (if (and (sqlup-should-do-workp)
-	     (not (sqlup-commentp (thing-at-point 'line))))
-	(sqlup-maybe-capitalize-last-symbol))))
+  (if (sqlup-should-do-workp)
+      (save-excursion (sqlup-maybe-capitalize-symbol -1))))
 
 (defun sqlup-should-do-workp ()
+  "sqlup is triggered after user keypresses. Here we check that this was one of the keypresses we care about."
   (or (sqlup-user-pressed-returnp)
       (and (sqlup-user-is-typingp)
 	   (sqlup-trigger-self-insert-characterp))))
@@ -88,37 +87,38 @@
   (string= "self-insert-command" (symbol-name this-command)))
 
 (defun sqlup-trigger-self-insert-characterp ()
-  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; _?\ _ is 'SPC'
+  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; "?\ " is 'SPC'
 	(sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
-(defun sqlup-commentp (line)
-  (and
-   (nth 4 (syntax-ppss))
-   t))
-
-(defun sqlup-maybe-capitalize-last-symbol ()
-  (forward-symbol -1)
-  (sqlup-work-on-symbol (thing-at-point 'symbol) (bounds-of-thing-at-point 'symbol)))
-
-(defun sqlup-maybe-capitalize-next-symbol ()
-  (forward-symbol 1)
+(defun sqlup-maybe-capitalize-symbol (direction)
+  "DIRECTION is either 1 for forward or -1 for backward"
+  (forward-symbol direction)
   (sqlup-work-on-symbol (thing-at-point 'symbol) (bounds-of-thing-at-point 'symbol)))
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
-	   (not (sqlup-quotedp (car symbol-boundaries)
-			       (cdr symbol-boundaries)))
-	   (sqlup-keywordp (downcase symbol)))
+	   (sqlup-keywordp (downcase symbol))
+	   (sqlup-capitalizablep (point)))
       (progn
 	(delete-region (car symbol-boundaries)
 		       (cdr symbol-boundaries))
 	(insert (upcase symbol)))))
 
-(defun sqlup-quotedp (symbol-start-pos symbol-end-pos)
-  (and
-   (nth 3 (syntax-ppss))
-   t))
+(defun sqlup-capitalizablep (point-location)
+  (let ((old-buffer (current-buffer)))
+    (with-temp-buffer
+      (insert-buffer-substring old-buffer)
+      (sql-mode)
+      (goto-char point-location)
+      (and (not (sqlup-commentp))
+	   (not (sqlup-stringp))))))
+
+(defun sqlup-commentp ()
+  (and (nth 4 (syntax-ppss)) t))
+
+(defun sqlup-stringp ()
+  (and (nth 3 (syntax-ppss)) t))
 
 ;;;###autoload
 (defun sqlup-capitalize-keywords-in-region (start-pos end-pos)
@@ -127,7 +127,7 @@
   (save-excursion
     (goto-char start-pos)
     (while (< (point) end-pos)
-      (sqlup-maybe-capitalize-next-symbol))))
+      (sqlup-maybe-capitalize-symbol 1))))
 
 (defun sqlup-keywords-regexps ()
   (if (not sqlup-local-keywords-regexps)
