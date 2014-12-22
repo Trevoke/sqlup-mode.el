@@ -16,7 +16,8 @@ really.
 
 ### MELPA
 
-[![MELPA](http://melpa.org/packages/sqlup-mode-badge.svg)](http://melpa.org/#/sqlup-mode)
+[![MELPA](http://melpa.org/packages/sqlup-mode-badge.svg)](http://melpa.org/#/sqlup-mode) [![MELPA Stable](http://stable.melpa.org/packages/sqlup-mode-badge.svg)](http://stable.melpa.org/#/sqlup-mode)
+
 
 ### Marmalade
 
