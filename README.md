@@ -30,8 +30,12 @@ sqlup-mode is NOT YET on Marmalade.
 Here follows an example setup to activate `sqlup-mode` automatically when entering sql-mode or sql-interactive-mode:
 
 ``` lisp
+;; Capitalize keywords in SQL mode
 (add-hook 'sql-mode-hook 'sqlup-mode)
+;; Capitalize keywords in an interactive session (e.g. psql)
 (add-hook 'sql-interactive-mode-hook 'sqlup-mode)
+;; Set a global keyword to use sqlup on a region
+(global-set-key (kbd "C-c u") 'sqlup-capitalize-keywords-in-region)
 ```
 
 ### Normal typing (e.g. SQL REPL)
