@@ -80,8 +80,9 @@
 	   (sqlup-trigger-self-insert-characterp))))
 
 (defun sqlup-user-pressed-returnp ()
-  (and (> 0 (length (this-command-keys-vector)))
-       (equal 13 (elt (this-command-keys-vector) 0))))
+  (and (< 0 (length (this-command-keys-vector)))
+       (or (equal 13 (elt (this-command-keys-vector) 0))
+           (equal 10 (elt (this-command-keys-vector) 0)))))
 
 (defun sqlup-user-is-typingp ()
   (string= "self-insert-command" (symbol-name this-command)))
