@@ -160,4 +160,11 @@
   "Buffer local variable holding regexps from sql-mode to
 identify keywords.")
 
+;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
+;; the sql product. We need to advice sql-set-product since sql-mode does not
+;; provide any hook that runs after changing the product
+(defadvice sql-set-product (after sqlup-invalidate-sqlup-keyword-cache activate)
+  "Invalidate sqlup-keyword cache after sql-product changes"
+  (setq sqlup-local-keywords-regexps nil))
+
 (provide 'sqlup-mode)
