@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.5.3 (Oct 4, 2015)
+
+* Hi, people who read Changelogs. I dropped the ball a bit.
+* sqlup now will use keywords based on the correct SQL product
+
 ### 0.4.5 (Aug 20, 2014)
 
 * Do not upcase keywords surrounded by backticks or double-quotes
