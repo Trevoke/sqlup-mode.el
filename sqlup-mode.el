@@ -168,3 +168,4 @@ identify keywords.")
   (setq sqlup-local-keywords-regexps nil))
 
 (provide 'sqlup-mode)
+;;; sqlup-mode.el ends here
