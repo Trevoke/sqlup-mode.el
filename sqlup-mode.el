@@ -52,6 +52,10 @@
 
 ;;; Code:
 
+(defvar sqlup-local-keywords-regexps nil
+  "Buffer local variable holding regexps from sql-mode to
+identify keywords.")
+
 ;;;###autoload
 (define-minor-mode sqlup-mode
   "Capitalizes SQL keywords for you."
@@ -155,10 +159,6 @@
 	(setq sqlup-term (car sqlup-terms))
 	(setq sqlup-terms (cdr sqlup-terms)))
       (and sqlup-keyword-found t))))
-
-(defvar sqlup-local-keywords-regexps nil
-  "Buffer local variable holding regexps from sql-mode to
-identify keywords.")
 
 ;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
 ;; the sql product. We need to advice sql-set-product since sql-mode does not
