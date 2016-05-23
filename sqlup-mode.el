@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.5.3
+;; Version: 0.5.4
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -27,8 +27,8 @@
 
 ;;; Commentary:
 
-;; Activate the minor mode (M-x sqlup-mode) and type away
-;; Alternatively, use a hook: (add-hook 'sql-mode 'sqlup-mode)
+;; `M-x sqlup-mode` and just type.
+;; This mode supports the various built-in SQL modes as well as redis-mode.
 ;; The capitalization is triggered when you press the following keys:
 ;; * SPC
 ;; * ,
@@ -40,14 +40,16 @@
 ;;
 ;; M-x sqlup-capitalize-keywords-in-region
 ;;
-;; It is not bound to a keybinding, but here is an example of how you could do it:
+;; It is not bound to a keybinding. Here is an example of how you could do it:
 ;;
 ;; (global-set-key (kbd "C-c u") 'sqlup-capitalize-keywords-in-region)
 ;;
-;; Here follows an example setup to activate `sqlup-mode` automatically when entering sql-mode or sql-interactive-mode:
+;; Here follows an example setup to activate `sqlup-mode` automatically:
 ;;
 ;; (add-hook 'sql-mode-hook 'sqlup-mode)
 ;; (add-hook 'sql-interactive-mode-hook 'sqlup-mode)
+;; (add-hook 'redis-mode-hook 'sqlup-mode)
+
 
 
 ;;; Code:
@@ -74,26 +76,26 @@ identify keywords.")
 
 (defun sqlup-capitalize-as-you-type ()
   "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
-  (if (sqlup-should-do-workp)
+  (if (sqlup-should-do-work-p)
       (save-excursion (sqlup-maybe-capitalize-symbol -1))))
 
-(defun sqlup-should-do-workp ()
+(defun sqlup-should-do-work-p ()
   "sqlup is triggered after user keypresses. Here we check that this was one of the keypresses we care about."
-  (or (sqlup-user-pressed-returnp)
-      (and (sqlup-user-is-typingp)
-	   (sqlup-trigger-self-insert-characterp))))
+  (or (sqlup-user-pressed-return-p)
+      (and (sqlup-user-is-typing-p)
+           (sqlup-trigger-self-insert-character-p))))
 
-(defun sqlup-user-pressed-returnp ()
+(defun sqlup-user-pressed-return-p ()
   (and (< 0 (length (this-command-keys-vector)))
        (or (equal 13 (elt (this-command-keys-vector) 0))
            (equal 10 (elt (this-command-keys-vector) 0)))))
 
-(defun sqlup-user-is-typingp ()
+(defun sqlup-user-is-typing-p ()
   (string= "self-insert-command" (symbol-name this-command)))
 
-(defun sqlup-trigger-self-insert-characterp ()
+(defun sqlup-trigger-self-insert-character-p ()
   (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; "?\ " is 'SPC'
-	(sqlup-current-char (elt (this-command-keys-vector) 0)))
+        (sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
 (defun sqlup-maybe-capitalize-symbol (direction)
@@ -103,26 +105,26 @@ identify keywords.")
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
-	   (sqlup-keywordp (downcase symbol))
-	   (sqlup-capitalizablep (point)))
+           (sqlup-keywordp (downcase symbol))
+           (sqlup-capitalizable-p (point)))
       (progn
-	(delete-region (car symbol-boundaries)
-		       (cdr symbol-boundaries))
-	(insert (upcase symbol)))))
+        (delete-region (car symbol-boundaries)
+                       (cdr symbol-boundaries))
+        (insert (upcase symbol)))))
 
-(defun sqlup-capitalizablep (point-location)
+(defun sqlup-capitalizable-p (point-location)
   (let ((old-buffer (current-buffer)))
     (with-temp-buffer
       (insert-buffer-substring old-buffer)
       (sql-mode)
       (goto-char point-location)
-      (and (not (sqlup-commentp))
-	   (not (sqlup-stringp))))))
+      (and (not (sqlup-comment-p))
+           (not (sqlup-string-p))))))
 
-(defun sqlup-commentp ()
+(defun sqlup-comment-p ()
   (and (nth 4 (syntax-ppss)) t))
 
-(defun sqlup-stringp ()
+(defun sqlup-string-p ()
   (and (nth 3 (syntax-ppss)) t))
 
 ;;;###autoload
@@ -135,29 +137,38 @@ identify keywords.")
       (sqlup-maybe-capitalize-symbol 1))))
 
 (defun sqlup-keywords-regexps ()
-  (if (not sqlup-local-keywords-regexps)
-      (setq-local sqlup-local-keywords-regexps (sqlup-find-correct-keywords)))
-  sqlup-local-keywords-regexps)
+  (if (not sqlup-local-keywords)
+      (setq-local sqlup-local-keywords (sqlup-find-correct-keywords)))
+  sqlup-local-keywords)
 
 (defun sqlup-find-correct-keywords ()
-  "If emacs is handling the logic for syntax highlighting of SQL keywords, then we piggyback on top of that logic. If not, we use an sql-mode function to create a list of regular expressions and use that."
-  (if (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords)
-      (mapcar 'car sql-mode-font-lock-keywords)
-    (mapcar 'car (sql-add-product-keywords
-		  (or (and (boundp 'sql-product) sql-product) 'ansi) '()))))
+  """If emacs is handling the logic for syntax highlighting of SQL keywords,
+then we piggyback on top of that logic. If not, we use an sql-mode function to
+create a list of regular expressions and use that.
+"""
+(cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
+      ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
+      (t (mapcar 'car (sql-add-product-keywords
+                       (or (and (boundp 'sql-(point)roduct) sql-product) 'ansi) '())))))
 
-(defun sqlup-keywordp (word)
+(defun sqlup-redis-mode-p ()
+  (string= (with-current-buffer (current-buffer) major-mode) "redis-mode"))
+
+(defun sqlup-within-sql-buffer-p ()
+  (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
+
+(defun sqlup-keyword-p (word)
   (let* ((sqlup-keyword-found nil)
-	 (sqlup-terms (sqlup-keywords-regexps))
-	 (sqlup-term (car sqlup-terms))
-	 (temp-syntax (make-syntax-table)))
+         (sqlup-terms (sqlup-keywords-regexps))
+         (sqlup-term (car sqlup-terms))
+         (temp-syntax (make-syntax-table)))
     (modify-syntax-entry ?_ "w" temp-syntax)
     (with-syntax-table temp-syntax
       (while (and (not sqlup-keyword-found)
-		  sqlup-terms)
-	(setq sqlup-keyword-found (string-match sqlup-term word))
-	(setq sqlup-term (car sqlup-terms))
-	(setq sqlup-terms (cdr sqlup-terms)))
+                  sqlup-terms)
+        (setq sqlup-keyword-found (string-match sqlup-term word))
+        (setq sqlup-term (car sqlup-terms))
+        (setq sqlup-terms (cdr sqlup-terms)))
       (and sqlup-keyword-found t))))
 
 ;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
@@ -165,7 +176,7 @@ identify keywords.")
 ;; provide any hook that runs after changing the product
 (defadvice sql-set-product (after sqlup-invalidate-sqlup-keyword-cache activate)
   "Invalidate sqlup-keyword cache after sql-product changes"
-  (setq sqlup-local-keywords-regexps nil))
+  (setq sqlup-local-keywords nil))
 
 (provide 'sqlup-mode)
 ;;; sqlup-mode.el ends here

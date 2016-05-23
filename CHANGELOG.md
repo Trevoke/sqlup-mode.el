@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### 0.5.4 (May 23, 2016)
+
+* Support for redis-mode (provided by `redis` package)
+* Multi-word predicate functions end in `-p`
+* Untabify
+
 ### 0.5.3 (Oct 4, 2015)
 
 * Hi, people who read Changelogs. I dropped the ball a bit.
