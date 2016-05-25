@@ -54,6 +54,8 @@
 
 ;;; Code:
 
+(defvar sqlup-local-keywords nil)
+
 (defvar sqlup-local-keywords-regexps nil
   "Buffer local variable holding regexps from sql-mode to
 identify keywords.")
@@ -138,7 +140,7 @@ identify keywords.")
 
 (defun sqlup-keywords-regexps ()
   (if (not sqlup-local-keywords)
-      (setq-local sqlup-local-keywords (sqlup-find-correct-keywords)))
+      (set (make-local-variable 'sqlup-local-keywords) (sqlup-find-correct-keywords)))
   sqlup-local-keywords)
 
 (defun sqlup-find-correct-keywords ()
@@ -149,7 +151,7 @@ create a list of regular expressions and use that.
 (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
       ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
       (t (mapcar 'car (sql-add-product-keywords
-                       (or (and (boundp 'sql-(point)roduct) sql-product) 'ansi) '())))))
+                       (or (and (boundp 'sql-product) sql-product) 'ansi) '())))))
 
 (defun sqlup-redis-mode-p ()
   (string= (with-current-buffer (current-buffer) major-mode) "redis-mode"))
