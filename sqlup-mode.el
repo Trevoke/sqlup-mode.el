@@ -105,7 +105,7 @@ identify keywords.")
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
-           (sqlup-keywordp (downcase symbol))
+           (sqlup-keyword-p (downcase symbol))
            (sqlup-capitalizable-p (point)))
       (progn
         (delete-region (car symbol-boundaries)
