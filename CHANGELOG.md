@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### 0.5.6 (May 25, 2016)
+
+* Increase support for older emacsen
+* Fix the code
+* Continue thinking about how nice it'd be to have tests for this
+
 ### 0.5.5 (May 24, 2016)
 
 * Fix bug: I can't use string-replace apparently
