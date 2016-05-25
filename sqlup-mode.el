@@ -54,6 +54,8 @@
 
 ;;; Code:
 
+(defvar sqlup-local-keywords nil)
+
 (defvar sqlup-local-keywords-regexps nil
   "Buffer local variable holding regexps from sql-mode to
 identify keywords.")
@@ -138,7 +140,7 @@ identify keywords.")
 
 (defun sqlup-keywords-regexps ()
   (if (not sqlup-local-keywords)
-      (setq-local sqlup-local-keywords (sqlup-find-correct-keywords)))
+      (set (make-local-variable 'sqlup-local-keywords) (sqlup-find-correct-keywords)))
   sqlup-local-keywords)
 
 (defun sqlup-find-correct-keywords ()
