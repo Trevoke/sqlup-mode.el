@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.5.5 (May 24, 2016)
+
+* Fix bug: I can't use string-replace apparently
+
 ### 0.5.4 (May 23, 2016)
 
 * Support for redis-mode (provided by `redis` package)
