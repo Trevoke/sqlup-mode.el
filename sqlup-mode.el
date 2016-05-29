@@ -60,6 +60,10 @@
   "Buffer local variable holding regexps from sql-mode to
 identify keywords.")
 
+(defvar last-sql-keyword "")
+
+(defvar in-execute-string nil)
+
 ;;;###autoload
 (define-minor-mode sqlup-mode
   "Capitalizes SQL keywords for you."
@@ -96,7 +100,7 @@ identify keywords.")
   (string= "self-insert-command" (symbol-name this-command)))
 
 (defun sqlup-trigger-self-insert-character-p ()
-  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; "?\ " is 'SPC'
+  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,?\')) ;; "?\ " is 'SPC'
         (sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
@@ -112,6 +116,10 @@ identify keywords.")
       (progn
         (delete-region (car symbol-boundaries)
                        (cdr symbol-boundaries))
+	(setq last-sql-keyword symbol)
+	(if (string-match "execute" last-sql-keyword)
+	    (setq in-execute-string t)) ;; the execute keyword triggers upcase for formatted SQL
+;;	(message "in execute string=%s" in-execute-string)
         (insert (upcase symbol)))))
 
 (defun sqlup-capitalizable-p (point-location)
@@ -120,8 +128,10 @@ identify keywords.")
       (insert-buffer-substring old-buffer)
       (sql-mode)
       (goto-char point-location)
+      (if (not (and in-execute-string (sqlup-string-p)))
+	  (setq in-execute-string nil)) ;; we were in an execute string but the string is closed
       (and (not (sqlup-comment-p))
-           (not (sqlup-string-p))))))
+           (not (and (not in-execute-string) (sqlup-string-p)))))))
 
 (defun sqlup-comment-p ()
   (and (nth 4 (syntax-ppss)) t))
