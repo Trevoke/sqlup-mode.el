@@ -64,6 +64,9 @@ identify keywords.")
 
 (defvar in-execute-string nil)
 
+(defvar eval-keywords
+  '((postgres "EXECUTE")))
+
 ;;;###autoload
 (define-minor-mode sqlup-mode
   "Capitalizes SQL keywords for you."
@@ -117,10 +120,14 @@ identify keywords.")
         (delete-region (car symbol-boundaries)
                        (cdr symbol-boundaries))
 	(setq last-sql-keyword symbol)
-	(if (string-match "execute" last-sql-keyword)
-	    (setq in-execute-string t)) ;; the execute keyword triggers upcase for formatted SQL
-;;	(message "in execute string=%s" in-execute-string)
+	(if (sqlup-match-eval-keyword-p (or (and (boundp 'sql-product) sql-product) 'ansi) symbol)
+	    (setq in-execute-string t)) ;;  upcase formatted SQL in eval strings
         (insert (upcase symbol)))))
+
+(defun sqlup-match-eval-keyword-p(dialect keyword)
+  "Does KEYWORD announce an eval string in DIALECT?"
+  (some 'identity
+	(mapcar #'(lambda (kw) (string-equal kw keyword)) (assoc dialect eval-keywords))))
 
 (defun sqlup-capitalizable-p (point-location)
   (let ((old-buffer (current-buffer)))
