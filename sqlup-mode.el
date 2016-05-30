@@ -60,12 +60,15 @@
   "Buffer local variable holding regexps from sql-mode to
 identify keywords.")
 
-(defvar last-sql-keyword "")
+(defvar last-sql-keyword nil
+  "Holds the last SQL keyword entered in the buffer.")
 
-(defvar in-execute-string nil)
+(defvar in-execute-string nil
+  "Set to t when we are in an eval string and not a regular string.")
 
 (defvar eval-keywords
-  '((postgres "EXECUTE")))
+  '((postgres "EXECUTE"))
+"List of keywords introducing eval strings, organised by dialect.")
 
 ;;;###autoload
 (define-minor-mode sqlup-mode
