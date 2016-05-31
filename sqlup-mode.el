@@ -60,6 +60,16 @@
   "Buffer local variable holding regexps from sql-mode to
 identify keywords.")
 
+(defvar last-sql-keyword nil
+  "Holds the last SQL keyword entered in the buffer.")
+
+(defvar in-execute-string nil
+  "Set to t when we are in an eval string and not a regular string.")
+
+(defvar eval-keywords
+  '((postgres "EXECUTE"))
+"List of keywords introducing eval strings, organised by dialect.")
+
 ;;;###autoload
 (define-minor-mode sqlup-mode
   "Capitalizes SQL keywords for you."
@@ -96,7 +106,7 @@ identify keywords.")
   (string= "self-insert-command" (symbol-name this-command)))
 
 (defun sqlup-trigger-self-insert-character-p ()
-  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,)) ;; "?\ " is 'SPC'
+  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,?\')) ;; "?\ " is 'SPC'
         (sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
@@ -112,7 +122,15 @@ identify keywords.")
       (progn
         (delete-region (car symbol-boundaries)
                        (cdr symbol-boundaries))
+	(setq last-sql-keyword symbol)
+	(if (sqlup-match-eval-keyword-p (or (and (boundp 'sql-product) sql-product) 'ansi) symbol)
+	    (setq in-execute-string t)) ;;  upcase formatted SQL in eval strings
         (insert (upcase symbol)))))
+
+(defun sqlup-match-eval-keyword-p(dialect keyword)
+  "Does KEYWORD announce an eval string in DIALECT?"
+  (some 'identity
+	(mapcar #'(lambda (kw) (string-equal kw keyword)) (assoc dialect eval-keywords))))
 
 (defun sqlup-capitalizable-p (point-location)
   (let ((old-buffer (current-buffer)))
@@ -120,8 +138,10 @@ identify keywords.")
       (insert-buffer-substring old-buffer)
       (sql-mode)
       (goto-char point-location)
+      (if (not (and in-execute-string (sqlup-string-p)))
+	  (setq in-execute-string nil)) ;; we were in an execute string but the string is closed
       (and (not (sqlup-comment-p))
-           (not (sqlup-string-p))))))
+           (not (and (not in-execute-string) (sqlup-string-p)))))))
 
 (defun sqlup-comment-p ()
   (and (nth 4 (syntax-ppss)) t))
