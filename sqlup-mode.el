@@ -66,11 +66,12 @@
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
 
-(defvar sqlup-local-keywords nil)
+(defconst sqlup-eval-keywords
+  '((postgres "EXECUTE"))
+"List of keywords introducing eval strings, organised by dialect.")
 
-(defvar sqlup-local-keywords-regexps nil
-  "Buffer local variable holding regexps from sql-mode to
-identify keywords.")
+(defvar sqlup-local-keywords nil
+    "Buffer local variable holding regexps to identify keywords.")
 
 (defvar sqlup-last-sql-keyword nil
   "Holds the last SQL keyword entered in the buffer.")
@@ -78,9 +79,6 @@ identify keywords.")
 (defvar sqlup-in-execute-string nil
   "Set to t when we are in an eval string and not a regular string.")
 
-(defvar sqlup-eval-keywords
-  '((postgres "EXECUTE"))
-"List of keywords introducing eval strings, organised by dialect.")
 
 ;;;###autoload
 (define-minor-mode sqlup-mode
@@ -91,6 +89,9 @@ identify keywords.")
     (sqlup-disable-keyword-capitalization)))
 
 (defun sqlup-enable-keyword-capitalization ()
+  (set (make-local-variable 'sqlup-local-keywords) nil)
+  (set (make-local-variable 'sqlup-last-sql-keyword) nil)
+  (set (make-local-variable 'sqlup-in-execute-string) nil)
   "Add buffer-local hook to handle this mode's logic"
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
@@ -118,8 +119,7 @@ identify keywords.")
   (string= "self-insert-command" (symbol-name this-command)))
 
 (defun sqlup-trigger-self-insert-character-p ()
-  (let (
-        (sqlup-current-char (elt (this-command-keys-vector) 0)))
+  (let ((sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
 (defun sqlup-maybe-capitalize-symbol (direction)
@@ -176,9 +176,9 @@ identify keywords.")
   sqlup-local-keywords)
 
 (defun sqlup-find-correct-keywords ()
-  """If emacs is handling the logic for syntax highlighting of SQL keywords,
-then we piggyback on top of that logic. If not, we use an sql-mode function to
-create a list of regular expressions and use that.
+  """Depending on the major mode (redis-mode or sql-mode), find the
+correct keywords. If not, create a (hopefully sane) default based on
+ANSI SQL keywords.
 """
 (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
       ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
