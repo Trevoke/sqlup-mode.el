@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.5.7 (May 30, 2016)
+
+* Add support for upcasing keywords within eval strings (psql only)
+
 ### 0.5.6 (May 25, 2016)
 
 * Increase support for older emacsen

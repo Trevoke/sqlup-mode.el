@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.5.6
+;; Version: 0.5.7
 ;; Keywords: sql, tools
 
 ;;; License:
@@ -106,7 +106,7 @@ identify keywords.")
   (string= "self-insert-command" (symbol-name this-command)))
 
 (defun sqlup-trigger-self-insert-character-p ()
-  (let ((sqlup-trigger-characters '(?\; ?\  ?\( ?\,?\')) ;; "?\ " is 'SPC'
+  (let ((sqlup-trigger-characters '(?\;?\ ?\(?\,?\')) ;; "?\ " is 'SPC'
         (sqlup-current-char (elt (this-command-keys-vector) 0)))
     (member sqlup-current-char sqlup-trigger-characters)))
 
