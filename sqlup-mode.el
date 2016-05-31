@@ -91,7 +91,6 @@ this mode's logic will be evaluated.")
 (defun sqlup-enable-keyword-capitalization ()
   (set (make-local-variable 'sqlup-local-keywords) nil)
   (set (make-local-variable 'sqlup-last-sql-keyword) nil)
-  (set (make-local-variable 'sqlup-in-execute-string) nil)
   "Add buffer-local hook to handle this mode's logic"
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
