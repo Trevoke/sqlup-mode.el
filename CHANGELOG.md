@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.5.8 (May 30, 2016)
+
+* Variable renaming, slight increase in readability
+
 ### 0.5.7 (May 30, 2016)
 
 * Add support for upcasing keywords within eval strings (psql only)
