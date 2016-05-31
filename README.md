@@ -46,7 +46,8 @@ typing. The minor mode will be triggered by the following keys:
 * `(`
 * `,`
 * `;`
-* `\r` (Enter)
+* `RET`
+* `'`
 
 ### Work with a region
 
