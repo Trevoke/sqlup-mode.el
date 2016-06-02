@@ -1,7 +1,7 @@
 EMACS ?= emacs
 CASK ?= cask
 
-test:
+unit:
 	${CASK} exec ert-runner
 
 e2e:
