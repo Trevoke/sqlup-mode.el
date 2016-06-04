@@ -67,17 +67,11 @@
 this mode's logic will be evaluated.")
 
 (defconst sqlup-eval-keywords
-  '((postgres "EXECUTE"))
-"List of keywords introducing eval strings, organised by dialect.")
+  '((postgres "EXECUTE" "format("))
+  "List of keywords introducing eval strings, organised by dialect.")
 
 (defvar sqlup-local-keywords nil
     "Buffer local variable holding regexps to identify keywords.")
-
-(defvar sqlup-last-sql-keyword nil
-  "Holds the last SQL keyword entered in the buffer.")
-
-(defvar sqlup-in-execute-string nil
-  "Set to t when we are in an eval string and not a regular string.")
 
 ;;;###autoload
 (define-minor-mode sqlup-mode
@@ -132,19 +126,13 @@ this mode's logic will be evaluated.")
       (progn
         (delete-region (car symbol-boundaries)
                        (cdr symbol-boundaries))
-;;        (setq sqlup-last-sql-keyword symbol)
-;;        (if (sqlup-match-eval-keyword-p (or (and (boundp 'sql-product) sql-product) 'ansi) symbol)
-;;            (setq sqlup-in-execute-string t)) ;;  upcase formatted SQL in eval strings
         (insert (upcase symbol)))))
 
-;; (defun sqlup-match-eval-keyword-p(dialect keyword)
-;;   "Does KEYWORD announce an eval string in DIALECT?"
-;;   (some 'identity
-;;         (mapcar #'(lambda (kw) (string-equal kw keyword)) (assoc dialect sqlup-eval-keywords))))
-
 (defun sqlup-match-eval-keyword-p (dialect)
-  "Return t if the code just before point ends with an eval keyword."
-  (looking-back "EXECUTE "))
+  "Return t if the code just before point ends with an eval keyword valid in DIALECT."
+  (some 'identity
+	(mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
+		(cdr (assoc dialect sqlup-eval-keywords)))))
 
 (defun sqlup-in-eval-string-p (dialect)
   "Return t if we are in an eval string."
@@ -161,10 +149,6 @@ this mode's logic will be evaluated.")
       (insert-buffer-substring old-buffer)
       (sql-mode)
       (goto-char point-location)
-      (message "the test: %s"
-	             (and (not (sqlup-comment-p))
-			  (not (and (not (sqlup-in-eval-string-p dialect))
-				    (sqlup-string-p)))))
       (and (not (sqlup-comment-p))
            (not (and (not (sqlup-in-eval-string-p dialect))
 		     (sqlup-string-p)))))))
