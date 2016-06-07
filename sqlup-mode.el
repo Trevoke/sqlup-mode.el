@@ -115,7 +115,7 @@ this mode's logic will be evaluated.")
            (equal 10 (elt (this-command-keys-vector) 0)))))
 
 (defun sqlup-user-is-typing-p ()
-  (string= "self-insert-command" (symbol-name this-command)))
+  (eq this-command #'self-insert-command))
 
 (defun sqlup-trigger-self-insert-character-p ()
   (let ((sqlup-current-char (elt (this-command-keys-vector) 0)))
@@ -124,19 +124,22 @@ this mode's logic will be evaluated.")
 (defun sqlup-maybe-capitalize-symbol (direction)
   "DIRECTION is either 1 for forward or -1 for backward"
   (forward-symbol direction)
-  (sqlup-work-on-symbol (thing-at-point 'symbol) (bounds-of-thing-at-point 'symbol)))
+  (sqlup-work-on-symbol (thing-at-point 'symbol)
+                        (bounds-of-thing-at-point 'symbol)))
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
            (sqlup-keyword-p (downcase symbol))
            (sqlup-capitalizable-p (point)))
       (progn
-        (delete-region (car symbol-boundaries)
-                       (cdr symbol-boundaries))
         (setq sqlup-last-sql-keyword symbol)
-        (if (sqlup-match-eval-keyword-p (or (and (boundp 'sql-product) sql-product) 'ansi) symbol)
+        (if (sqlup-match-eval-keyword-p (or (and (boundp 'sql-product)
+                                                 sql-product)
+                                            'ansi) symbol)
             (setq sqlup-in-execute-string t)) ;;  upcase formatted SQL in eval strings
-        (insert (upcase symbol)))))
+        (upcase-region (car symbol-boundaries)
+                       (cdr symbol-boundaries))
+        )))
 
 (defun sqlup-match-eval-keyword-p(dialect keyword)
   "Does KEYWORD announce an eval string in DIALECT?"
@@ -182,10 +185,12 @@ ANSI SQL keywords.
 (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
       ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
       (t (mapcar 'car (sql-add-product-keywords
-                       (or (and (boundp 'sql-product) sql-product) 'ansi) '())))))
+                       (or (and (boundp 'sql-product)
+                                sql-product)
+                           'ansi) '())))))
 
 (defun sqlup-redis-mode-p ()
-  (string= (with-current-buffer (current-buffer) major-mode) "redis-mode"))
+  (eq major-mode #'redis-mode))
 
 (defun sqlup-within-sql-buffer-p ()
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
