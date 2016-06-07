@@ -89,9 +89,9 @@ this mode's logic will be evaluated.")
     (sqlup-disable-keyword-capitalization)))
 
 (defun sqlup-enable-keyword-capitalization ()
+  "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-local-keywords) nil)
   (set (make-local-variable 'sqlup-last-sql-keyword) nil)
-  "Add buffer-local hook to handle this mode's logic"
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
@@ -104,7 +104,7 @@ this mode's logic will be evaluated.")
       (save-excursion (sqlup-maybe-capitalize-symbol -1))))
 
 (defun sqlup-should-do-work-p ()
-  "sqlup is triggered after user keypresses. Here we check that this was one of the keypresses we care about."
+  "Sqlup is triggered after user keypresses. Here we check that this was one of the keypresses we care about."
   (or (sqlup-user-pressed-return-p)
       (and (sqlup-user-is-typing-p)
            (sqlup-trigger-self-insert-character-p))))
@@ -133,18 +133,16 @@ this mode's logic will be evaluated.")
            (sqlup-capitalizable-p (point)))
       (progn
         (setq sqlup-last-sql-keyword symbol)
-        (if (sqlup-match-eval-keyword-p (or (and (boundp 'sql-product)
-                                                 sql-product)
-                                            'ansi) symbol)
+        (if (sqlup-match-eval-keyword-p (sqlup-valid-sql-product) symbol)
             (setq sqlup-in-execute-string t)) ;;  upcase formatted SQL in eval strings
         (upcase-region (car symbol-boundaries)
-                       (cdr symbol-boundaries))
-        )))
+                       (cdr symbol-boundaries)))))
 
 (defun sqlup-match-eval-keyword-p(dialect keyword)
   "Does KEYWORD announce an eval string in DIALECT?"
   (some 'identity
-        (mapcar #'(lambda (kw) (string-equal kw keyword)) (assoc dialect sqlup-eval-keywords))))
+        (mapcar #'(lambda (kw) (string-equal kw keyword))
+                (assoc dialect sqlup-eval-keywords))))
 
 (defun sqlup-capitalizable-p (point-location)
   (let ((old-buffer (current-buffer)))
@@ -185,9 +183,12 @@ ANSI SQL keywords.
 (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
       ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
       (t (mapcar 'car (sql-add-product-keywords
-                       (or (and (boundp 'sql-product)
-                                sql-product)
-                           'ansi) '())))))
+                       (sqlup-valid-sql-product) '())))))
+
+(defun sqlup-valid-sql-product ()
+  (or (and (boundp 'sql-product)
+           sql-product)
+      'ansi))
 
 (defun sqlup-redis-mode-p ()
   (eq major-mode #'redis-mode))
