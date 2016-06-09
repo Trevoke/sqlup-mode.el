@@ -3,9 +3,19 @@
 `sqlup-mode` is a minor mode for emacs. Its sole purpose is to make
 your life easier when writing SQL.
 
+### Purpose
+
 SQL, by convention, uses upper-case keywords, although lower-case
 works just as well. As humans, the separation between upper-case and
 lower-case helps scan and parse the code much more quickly.
+
+This mode has been extended to upcase keywords when using `redis-mode`
+as well.
+
+### Pronunciation
+
+I gave a talk [(slides)](https://blog.trevoke.net/sqlup-talk/) at the 
+emacs NYC meetup, and it was decided that `sqlup` is pronounced `skloop`.
 
 ## Installation
 
