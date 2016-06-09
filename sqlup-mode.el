@@ -67,18 +67,11 @@
 this mode's logic will be evaluated.")
 
 (defconst sqlup-eval-keywords
-  '((postgres "EXECUTE"))
-"List of keywords introducing eval strings, organised by dialect.")
+  '((postgres "EXECUTE" "format("))
+  "List of keywords introducing eval strings, organised by dialect.")
 
 (defvar sqlup-local-keywords nil
     "Buffer local variable holding regexps to identify keywords.")
-
-(defvar sqlup-last-sql-keyword nil
-  "Holds the last SQL keyword entered in the buffer.")
-
-(defvar sqlup-in-execute-string nil
-  "Set to t when we are in an eval string and not a regular string.")
-
 
 ;;;###autoload
 (define-minor-mode sqlup-mode
@@ -132,28 +125,33 @@ this mode's logic will be evaluated.")
            (sqlup-keyword-p (downcase symbol))
            (sqlup-capitalizable-p (point)))
       (progn
-        (setq sqlup-last-sql-keyword symbol)
-        (if (sqlup-match-eval-keyword-p (sqlup-valid-sql-product) symbol)
-            (setq sqlup-in-execute-string t)) ;;  upcase formatted SQL in eval strings
         (upcase-region (car symbol-boundaries)
                        (cdr symbol-boundaries)))))
 
-(defun sqlup-match-eval-keyword-p(dialect keyword)
-  "Does KEYWORD announce an eval string in DIALECT?"
+(defun sqlup-match-eval-keyword-p (dialect)
+  "Return t if the code just before point ends with an eval keyword valid in DIALECT."
   (some 'identity
-        (mapcar #'(lambda (kw) (string-equal kw keyword))
-                (assoc dialect sqlup-eval-keywords))))
+        (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
+                (cdr (assoc dialect sqlup-eval-keywords)))))
+
+(defun sqlup-in-eval-string-p (dialect)
+  "Return t if we are in an eval string."
+  (save-excursion
+    (if (sqlup-string-p)
+        (progn
+          (goto-char (nth 8 (syntax-ppss)))
+          (sqlup-match-eval-keyword-p dialect)))))
 
 (defun sqlup-capitalizable-p (point-location)
-  (let ((old-buffer (current-buffer)))
+  (let ((old-buffer (current-buffer))
+        (dialect (or (and (boundp 'sql-product) sql-product) 'ansi)))
     (with-temp-buffer
       (insert-buffer-substring old-buffer)
       (sql-mode)
       (goto-char point-location)
-      (if (not (and sqlup-in-execute-string (sqlup-string-p)))
-          (setq sqlup-in-execute-string nil)) ;; we were in an execute string but the string is closed
       (and (not (sqlup-comment-p))
-           (not (and (not sqlup-in-execute-string) (sqlup-string-p)))))))
+           (not (and (not (sqlup-in-eval-string-p dialect))
+                     (sqlup-string-p)))))))
 
 (defun sqlup-comment-p ()
   (and (nth 4 (syntax-ppss)) t))
