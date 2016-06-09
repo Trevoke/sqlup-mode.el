@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.5.9 (Jun 8, 2016)
+
+* Support for upcasing within strings inside `EXECUTE format(`
+* Tests!
+
 ### 0.5.8 (May 30, 2016)
 
 * Variable renaming, slight increase in readability
