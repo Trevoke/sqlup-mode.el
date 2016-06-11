@@ -11,10 +11,10 @@
 
 (add-to-list 'load-path sqlup-mode-root-path)
 
+(require 'ert)
+(require 'espuds)
 (require 'sqlup-mode (f-expand "sqlup-mode.el" sqlup-mode-root-path))
 (require 'redis)
-(require 'espuds)
-(require 'ert)
 
 (Setup
  ;; Before anything has run
@@ -26,7 +26,6 @@
 
 (After
   ;; After each scenario is run
- (erase-buffer)
  )
 
 (Teardown
