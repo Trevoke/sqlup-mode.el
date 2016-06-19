@@ -89,13 +89,16 @@ figures out what is and isn't a keyword.")
 (defun sqlup-enable-keyword-capitalization ()
   "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-work-buffer)
-       (generate-new-buffer-name (buffer-name)))
+       (clone-indirect-buffer
+        (generate-new-buffer-name (buffer-name))
+        nil))
   (set (make-local-variable 'sqlup-local-keywords) nil)
   (set (make-local-variable 'sqlup-last-sql-keyword) nil)
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
   "Remove buffer-local hook to handle this mode's logic"
+  (kill-buffer sqlup-work-buffer)
   (remove-hook 'post-command-hook 'sqlup-capitalize-as-you-type t))
 
 (defun sqlup-capitalize-as-you-type ()
