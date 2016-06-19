@@ -67,6 +67,12 @@
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
 
+(defconst sqlup-syntax-table
+  (let ((temp-syntax-table (make-syntax-table)))
+    (modify-syntax-entry ?_ "w" temp-syntax-table)
+    temp-syntax-table)
+  "Recognize underscores as part of a word")
+
 (defconst sqlup-eval-keywords
   '((postgres "EXECUTE" "format("))
   "List of keywords introducing eval strings, organised by dialect.")
@@ -88,30 +94,28 @@ figures out what is and isn't a keyword.")
 
 (defun sqlup-enable-keyword-capitalization ()
   "Add buffer-local hook to handle this mode's logic"
-  (set (make-local-variable 'sqlup-work-buffer)
-       (sqlup-create-work-buffer))
-
+  (set (make-local-variable 'sqlup-work-buffer) nil)
   (set (make-local-variable 'sqlup-local-keywords) nil)
   (set (make-local-variable 'sqlup-last-sql-keyword) nil)
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
   "Remove buffer-local hook to handle this mode's logic"
-  (kill-buffer sqlup-work-buffer)
+  (kill-buffer (sqlup-work-buffer))
   (remove-hook 'post-command-hook 'sqlup-capitalize-as-you-type t))
 
 (defun sqlup-capitalize-as-you-type ()
   "If the user typed a trigger key, check if we should capitalize
 the previous word."
-(if (sqlup-should-do-work-p)
-    (save-excursion (sqlup-maybe-capitalize-symbol -1))))
+  (if (sqlup-should-do-work-p)
+      (save-excursion (sqlup-maybe-capitalize-symbol -1))))
 
 (defun sqlup-should-do-work-p ()
   "Checks whether the user pressed one of the trigger keys.
 Other than <RET>, characters are in variable sqlup-trigger-characters."
-(or (sqlup-user-pressed-return-p)
-    (and (sqlup-user-is-typing-p)
-         (sqlup-trigger-self-insert-character-p))))
+  (or (sqlup-user-pressed-return-p)
+      (and (sqlup-user-is-typing-p)
+           (sqlup-trigger-self-insert-character-p))))
 
 (defun sqlup-user-pressed-return-p ()
   (and (< 0 (length (this-command-keys-vector)))
@@ -142,9 +146,9 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
 (defun sqlup-match-eval-keyword-p (dialect)
   "Return t if the code just before point ends with an eval keyword valid in
 the given DIALECT of SQL."
-(some 'identity
-      (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
-              (cdr (assoc dialect sqlup-eval-keywords)))))
+  (some 'identity
+        (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
+                (cdr (assoc dialect sqlup-eval-keywords)))))
 
 (defun sqlup-in-eval-string-p (dialect)
   "Return t if we are in an eval string."
@@ -155,13 +159,12 @@ the given DIALECT of SQL."
           (sqlup-match-eval-keyword-p dialect)))))
 
 (defun sqlup-capitalizable-p (point-location)
-  (let ((old-buffer (current-buffer))
-        (dialect (or (and (boundp 'sql-product) sql-product) 'ansi)))
-    (with-current-buffer sqlup-work-buffer
-      (goto-char point-location)
-      (and (not (sqlup-comment-p))
-           (not (and (not (sqlup-in-eval-string-p dialect))
-                     (sqlup-string-p)))))))
+  (let ((dialect (sqlup-valid-sql-product)))
+    (with-current-buffer (sqlup-work-buffer))
+    (goto-char point-location)
+    (and (not (sqlup-comment-p))
+         (not (and (not (sqlup-in-eval-string-p dialect))
+                   (sqlup-string-p))))))
 
 (defun sqlup-comment-p ()
   (and (nth 4 (syntax-ppss)) t))
@@ -187,10 +190,10 @@ the given DIALECT of SQL."
   "Depending on the major mode (redis-mode or sql-mode), find the
 correct keywords. If not, create a (hopefully sane) default based on
 ANSI SQL keywords."
-(cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
-      ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
-      (t (mapcar 'car (sql-add-product-keywords
-                       (sqlup-valid-sql-product) '())))))
+  (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
+        ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
+        (t (mapcar 'car (sql-add-product-keywords
+                         (sqlup-valid-sql-product) '())))))
 
 (defun sqlup-valid-sql-product ()
   (or (and (boundp 'sql-product)
@@ -206,10 +209,8 @@ ANSI SQL keywords."
 (defun sqlup-keyword-p (word)
   (let* ((sqlup-keyword-found nil)
          (sqlup-terms (sqlup-keywords-regexps))
-         (sqlup-term (car sqlup-terms))
-         (temp-syntax (make-syntax-table)))
-    (modify-syntax-entry ?_ "w" temp-syntax)
-    (with-syntax-table temp-syntax
+         (sqlup-term (car sqlup-terms)))
+    (with-syntax-table sqlup-syntax-table
       (while (and (not sqlup-keyword-found)
                   sqlup-terms)
         (setq sqlup-keyword-found (string-match sqlup-term word))
@@ -217,16 +218,18 @@ ANSI SQL keywords."
         (setq sqlup-terms (cdr sqlup-terms)))
       (and sqlup-keyword-found t))))
 
-(defun sqlup-create-work-buffer ()
-  "Create an indirect buffer based on current buffer and set its major mode
-to sql-mode"
-  ;; (with-current-buffer (clone-indirect-buffer (generate-new-buffer-name "foo") nil) (sql-mode) (current-buffer))
-  (with-current-buffer (clone-indirect-buffer
-                        (generate-new-buffer-name
-                         (format "*sqlup-%s*" (buffer-name)))
-                        nil)
-    (sql-mode)
-    (current-buffer)))
+(defun sqlup-work-buffer ()
+  "Returns and/or creates an indirect buffer based on current buffer and set
+its major mode to sql-mode"
+  (or sqlup-work-buffer
+      (set (make-local-variable 'sqlup-work-bufer)
+           (with-current-buffer (clone-indirect-buffer
+                                 (generate-new-buffer-name
+                                  (format "*sqlup-%s*" (buffer-name)))
+                                 nil)
+             (setq)
+             (sql-mode)
+             (current-buffer)))))
 
 ;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
 ;; the sql product. We need to advice sql-set-product since sql-mode does not
