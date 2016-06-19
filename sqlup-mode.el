@@ -60,10 +60,10 @@
 
 (defconst sqlup-trigger-characters
   (mapcar 'string-to-char '(";"
-                           " "
-                           "("
-                           ","
-                           "''"))
+                            " "
+                            "("
+                            ","
+                            "''"))
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
 
@@ -72,7 +72,11 @@ this mode's logic will be evaluated.")
   "List of keywords introducing eval strings, organised by dialect.")
 
 (defvar sqlup-local-keywords nil
-    "Buffer local variable holding regexps to identify keywords.")
+  "Buffer-local variable holding regexps to identify keywords.")
+
+(defvar sqlup-work-buffer nil
+  "Buffer-local variable keeping track of the name of the buffer where sqlup
+figures out what is and isn't a keyword.")
 
 ;;;###autoload
 (define-minor-mode sqlup-mode
@@ -84,6 +88,8 @@ this mode's logic will be evaluated.")
 
 (defun sqlup-enable-keyword-capitalization ()
   "Add buffer-local hook to handle this mode's logic"
+  (set (make-local-variable 'sqlup-work-buffer)
+       (generate-new-buffer-name (buffer-name)))
   (set (make-local-variable 'sqlup-local-keywords) nil)
   (set (make-local-variable 'sqlup-last-sql-keyword) nil)
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
@@ -93,21 +99,17 @@ this mode's logic will be evaluated.")
   (remove-hook 'post-command-hook 'sqlup-capitalize-as-you-type t))
 
 (defun sqlup-capitalize-as-you-type ()
-  """
-If the user typed a trigger key, check if we should capitalize
-the previous word.
-"""
-  (if (sqlup-should-do-work-p)
-      (save-excursion (sqlup-maybe-capitalize-symbol -1))))
+  "If the user typed a trigger key, check if we should capitalize
+the previous word."
+(if (sqlup-should-do-work-p)
+    (save-excursion (sqlup-maybe-capitalize-symbol -1))))
 
 (defun sqlup-should-do-work-p ()
-"""
-Checks whether the user pressed one of the trigger keys.
-Other than <RET>, characters are in variable sqlup-trigger-characters.
-"""
-  (or (sqlup-user-pressed-return-p)
-      (and (sqlup-user-is-typing-p)
-           (sqlup-trigger-self-insert-character-p))))
+  "Checks whether the user pressed one of the trigger keys.
+Other than <RET>, characters are in variable sqlup-trigger-characters."
+(or (sqlup-user-pressed-return-p)
+    (and (sqlup-user-is-typing-p)
+         (sqlup-trigger-self-insert-character-p))))
 
 (defun sqlup-user-pressed-return-p ()
   (and (< 0 (length (this-command-keys-vector)))
@@ -136,13 +138,11 @@ Other than <RET>, characters are in variable sqlup-trigger-characters.
                        (cdr symbol-boundaries)))))
 
 (defun sqlup-match-eval-keyword-p (dialect)
-  """
-Return t if the code just before point ends with an eval keyword valid in
-the given DIALECT of SQL.
-"""
-  (some 'identity
-        (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
-                (cdr (assoc dialect sqlup-eval-keywords)))))
+  "Return t if the code just before point ends with an eval keyword valid in
+the given DIALECT of SQL."
+(some 'identity
+      (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
+              (cdr (assoc dialect sqlup-eval-keywords)))))
 
 (defun sqlup-in-eval-string-p (dialect)
   "Return t if we are in an eval string."
@@ -184,10 +184,9 @@ the given DIALECT of SQL.
   sqlup-local-keywords)
 
 (defun sqlup-find-correct-keywords ()
-  """Depending on the major mode (redis-mode or sql-mode), find the
+  "Depending on the major mode (redis-mode or sql-mode), find the
 correct keywords. If not, create a (hopefully sane) default based on
-ANSI SQL keywords.
-"""
+ANSI SQL keywords."
 (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
       ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
       (t (mapcar 'car (sql-add-product-keywords
