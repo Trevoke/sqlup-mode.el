@@ -4,8 +4,8 @@ Feature: Upcasing SQL as I type
   I want to use sqlup-mode
 
   Background:
-    Given I turn on sqlup-mode
-    And the buffer is empty
+    Given the buffer is empty
+    And I turn on sqlup-mode
 
   Scenario: Upcase a normal SQL keyword after entering a space
     Given I type "select "
@@ -15,13 +15,13 @@ Feature: Upcasing SQL as I type
     Given I type "count("
     Then I should see "COUNT("
 
-Scenario: SQL keyword with underscore is upcased
+  Scenario: SQL keyword with underscore is upcased
     Given I type "character_set_name "
     Then I should see "CHARACTER_SET_NAME "
 
-  Scenario: Upcase two keywords when typing
-    Given I type "select count("
-    Then I should see "SELECT COUNT("
+  Scenario: keywords in strings and comments do not get upcased
+    Given I type "select count(*) 'select' -- select "
+    Then I should see "SELECT COUNT(*) 'select' -- select "
 
  Scenario: Upcase a normal SQL keyword in a postgres-execute eval string
     Given I start an action chain

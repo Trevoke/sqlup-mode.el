@@ -67,12 +67,6 @@
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
 
-(defconst sqlup-syntax-table
-  (let ((temp-syntax-table (make-syntax-table)))
-    (modify-syntax-entry ?_ "w" temp-syntax-table)
-    temp-syntax-table)
-  "Recognize underscores as part of a word")
-
 (defconst sqlup-eval-keywords
   '((postgres "EXECUTE" "format("))
   "List of keywords introducing eval strings, organised by dialect.")
@@ -160,11 +154,11 @@ the given DIALECT of SQL."
 
 (defun sqlup-capitalizable-p (point-location)
   (let ((dialect (sqlup-valid-sql-product)))
-    (with-current-buffer (sqlup-work-buffer))
-    (goto-char point-location)
-    (and (not (sqlup-comment-p))
-         (not (and (not (sqlup-in-eval-string-p dialect))
-                   (sqlup-string-p))))))
+    (with-current-buffer (sqlup-work-buffer)
+      (goto-char point-location)
+      (and (not (sqlup-comment-p))
+           (not (and (not (sqlup-in-eval-string-p dialect))
+                     (sqlup-string-p)))))))
 
 (defun sqlup-comment-p ()
   (and (nth 4 (syntax-ppss)) t))
@@ -182,9 +176,9 @@ the given DIALECT of SQL."
       (sqlup-maybe-capitalize-symbol 1))))
 
 (defun sqlup-keywords-regexps ()
-  (if (not sqlup-local-keywords)
-      (set (make-local-variable 'sqlup-local-keywords) (sqlup-find-correct-keywords)))
-  sqlup-local-keywords)
+  (or sqlup-local-keywords
+      (set (make-local-variable 'sqlup-local-keywords)
+           (sqlup-find-correct-keywords))))
 
 (defun sqlup-find-correct-keywords ()
   "Depending on the major mode (redis-mode or sql-mode), find the
@@ -226,7 +220,6 @@ its major mode to sql-mode"
                                  (generate-new-buffer-name
                                   (format "*sqlup-%s*" (buffer-name)))
                                  nil)
-             (set-syntax-table sqlup-syntax-table)
              (sql-mode)
              (current-buffer)))))
 

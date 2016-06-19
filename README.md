@@ -14,7 +14,7 @@ as well.
 
 ### Pronunciation
 
-I gave a talk [(slides)](https://blog.trevoke.net/sqlup-talk/) at the 
+I gave a talk [(slides)](https://blog.trevoke.net/sqlup-talk/) at the
 emacs NYC meetup, and it was decided that `sqlup` is pronounced `skloop`.
 
 ## Installation
@@ -68,3 +68,14 @@ Magic.
 ## Implementation choices
 
 I made the choice of only triggering the word-scanning when a particular keypress happens specifically because I don't want to see the word "ORde" typed when I'm typing "ORDER", and I didn't know a *simple* way to do it. I believe that in practice, this is good enough.
+
+# TODO
+
+- This test fails, but the behavior works. Why?
+```cucumber
+  Scenario: Upcase two keywords when typing
+    Given I type "select * from -- comment"
+    And I type " "
+    Then I should see "SELECT * FROM -- comment"
+```
+- what's with the jit-lock error? Can I make it so that this doesn't get weird for the user?
