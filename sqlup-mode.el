@@ -157,9 +157,7 @@ the given DIALECT of SQL."
 (defun sqlup-capitalizable-p (point-location)
   (let ((old-buffer (current-buffer))
         (dialect (or (and (boundp 'sql-product) sql-product) 'ansi)))
-    (with-temp-buffer
-      (insert-buffer-substring old-buffer)
-      (sql-mode)
+    (with-current-buffer sqlup-work-buffer
       (goto-char point-location)
       (and (not (sqlup-comment-p))
            (not (and (not (sqlup-in-eval-string-p dialect))
