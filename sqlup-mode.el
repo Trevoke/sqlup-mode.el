@@ -89,9 +89,7 @@ figures out what is and isn't a keyword.")
 (defun sqlup-enable-keyword-capitalization ()
   "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-work-buffer)
-       (clone-indirect-buffer
-        (generate-new-buffer-name (buffer-name))
-        nil))
+       (sqlup-create-work-buffer))
   (set (make-local-variable 'sqlup-local-keywords) nil)
   (set (make-local-variable 'sqlup-last-sql-keyword) nil)
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
@@ -219,6 +217,12 @@ ANSI SQL keywords."
         (setq sqlup-term (car sqlup-terms))
         (setq sqlup-terms (cdr sqlup-terms)))
       (and sqlup-keyword-found t))))
+
+(defun sqlup-create-work-buffer ()
+  (clone-indirect-buffer
+   (generate-new-buffer-name
+    (format "sqlup-%s" (buffer-name)))
+   nil))
 
 ;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
 ;; the sql product. We need to advice sql-set-product since sql-mode does not
