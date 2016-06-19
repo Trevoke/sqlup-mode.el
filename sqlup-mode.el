@@ -90,6 +90,7 @@ figures out what is and isn't a keyword.")
   "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-work-buffer)
        (sqlup-create-work-buffer))
+
   (set (make-local-variable 'sqlup-local-keywords) nil)
   (set (make-local-variable 'sqlup-last-sql-keyword) nil)
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
@@ -219,10 +220,15 @@ ANSI SQL keywords."
       (and sqlup-keyword-found t))))
 
 (defun sqlup-create-work-buffer ()
-  (clone-indirect-buffer
-   (generate-new-buffer-name
-    (format "sqlup-%s" (buffer-name)))
-   nil))
+  "Create an indirect buffer based on current buffer and set its major mode
+to sql-mode"
+  ;; (with-current-buffer (clone-indirect-buffer (generate-new-buffer-name "foo") nil) (sql-mode) (current-buffer))
+  (with-current-buffer (clone-indirect-buffer
+                        (generate-new-buffer-name
+                         (format "*sqlup-%s*" (buffer-name)))
+                        nil)
+    (sql-mode)
+    (current-buffer)))
 
 ;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
 ;; the sql product. We need to advice sql-set-product since sql-mode does not
