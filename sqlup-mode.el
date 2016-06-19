@@ -37,7 +37,8 @@
 ;; * (
 ;; * '
 ;;
-;; This package also provides a function to capitalize SQL keywords inside a region - always available, no need to activate the minor mode to use it:
+;; This package also provides a function to capitalize SQL keywords inside a
+;; region - always available, no need to activate the minor mode to use it:
 ;;
 ;; M-x sqlup-capitalize-keywords-in-region
 ;;
@@ -92,12 +93,18 @@ this mode's logic will be evaluated.")
   (remove-hook 'post-command-hook 'sqlup-capitalize-as-you-type t))
 
 (defun sqlup-capitalize-as-you-type ()
-  "This function is the post-command hook. This code gets run after every command in a buffer with this minor mode enabled."
+  """
+If the user typed a trigger key, check if we should capitalize
+the previous word.
+"""
   (if (sqlup-should-do-work-p)
       (save-excursion (sqlup-maybe-capitalize-symbol -1))))
 
 (defun sqlup-should-do-work-p ()
-  "Sqlup is triggered after user keypresses. Here we check that this was one of the keypresses we care about."
+"""
+Checks whether the user pressed one of the trigger keys.
+Other than <RET>, characters are in variable sqlup-trigger-characters.
+"""
   (or (sqlup-user-pressed-return-p)
       (and (sqlup-user-is-typing-p)
            (sqlup-trigger-self-insert-character-p))))
@@ -129,7 +136,10 @@ this mode's logic will be evaluated.")
                        (cdr symbol-boundaries)))))
 
 (defun sqlup-match-eval-keyword-p (dialect)
-  "Return t if the code just before point ends with an eval keyword valid in DIALECT."
+  """
+Return t if the code just before point ends with an eval keyword valid in
+the given DIALECT of SQL.
+"""
   (some 'identity
         (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
                 (cdr (assoc dialect sqlup-eval-keywords)))))
