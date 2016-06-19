@@ -210,13 +210,12 @@ ANSI SQL keywords."
   (let* ((sqlup-keyword-found nil)
          (sqlup-terms (sqlup-keywords-regexps))
          (sqlup-term (car sqlup-terms)))
-    (with-syntax-table sqlup-syntax-table
-      (while (and (not sqlup-keyword-found)
-                  sqlup-terms)
-        (setq sqlup-keyword-found (string-match sqlup-term word))
-        (setq sqlup-term (car sqlup-terms))
-        (setq sqlup-terms (cdr sqlup-terms)))
-      (and sqlup-keyword-found t))))
+    (while (and (not sqlup-keyword-found)
+                sqlup-terms)
+      (setq sqlup-keyword-found (string-match sqlup-term word))
+      (setq sqlup-term (car sqlup-terms))
+      (setq sqlup-terms (cdr sqlup-terms)))
+    (and sqlup-keyword-found t)))
 
 (defun sqlup-work-buffer ()
   "Returns and/or creates an indirect buffer based on current buffer and set
@@ -227,7 +226,7 @@ its major mode to sql-mode"
                                  (generate-new-buffer-name
                                   (format "*sqlup-%s*" (buffer-name)))
                                  nil)
-             (setq)
+             (set-syntax-table sqlup-syntax-table)
              (sql-mode)
              (current-buffer)))))
 

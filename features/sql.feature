@@ -15,6 +15,10 @@ Feature: Upcasing SQL as I type
     Given I type "count("
     Then I should see "COUNT("
 
+Scenario: SQL keyword with underscore is upcased
+    Given I type "character_set_name "
+    Then I should see "CHARACTER_SET_NAME "
+
   Scenario: Upcase two keywords when typing
     Given I type "select count("
     Then I should see "SELECT COUNT("
