@@ -26,3 +26,16 @@
   (lambda (something)
     ;; ...
     ))
+
+
+(When "^I turn off \\(.+\\)$"
+  "Turns off some mode."
+  (lambda (mode)
+    (let ((v (vconcat [?\C-u ?- 1 ?\M-x] (string-to-vector mode))))
+(execute-kbd-macro v))))
+
+(When "^I turn on \\(.+\\)$"
+  "Turns on some mode."
+  (lambda (mode)
+    (let ((v (vconcat [?\C-u ?\M-x] (string-to-vector mode) [?\C-m])))
+(execute-kbd-macro v))))

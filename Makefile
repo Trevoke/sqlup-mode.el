@@ -9,4 +9,4 @@ unit:
 	${CASK} exec ert-runner
 
 e2e:
-	${CASK} exec ecukes -r magnars
+	${CASK} exec ecukes

@@ -107,9 +107,13 @@ the previous word."
 (defun sqlup-should-do-work-p ()
   "Checks whether the user pressed one of the trigger keys.
 Other than <RET>, characters are in variable sqlup-trigger-characters."
-  (or (sqlup-user-pressed-return-p)
-      (and (sqlup-user-is-typing-p)
-           (sqlup-trigger-self-insert-character-p))))
+  (and (sqlup-not-just-initialized-p)
+       (or (sqlup-user-pressed-return-p)
+           (and (sqlup-user-is-typing-p)
+                (sqlup-trigger-self-insert-character-p)))))
+
+(defun sqlup-not-just-initialized-p ()
+  (not (eq this-command 'sqlup-mode)))
 
 (defun sqlup-user-pressed-return-p ()
   (and (< 0 (length (this-command-keys-vector)))
@@ -215,13 +219,26 @@ ANSI SQL keywords."
   "Returns and/or creates an indirect buffer based on current buffer and set
 its major mode to sql-mode"
   (or sqlup-work-buffer
-      (set (make-local-variable 'sqlup-work-bufer)
+      (set (make-local-variable 'sqlup-work-buffer)
            (with-current-buffer (clone-indirect-buffer
                                  (generate-new-buffer-name
                                   (format "*sqlup-%s*" (buffer-name)))
                                  nil)
              (sql-mode)
              (current-buffer)))))
+
+;; Because we're using indirect buffers, the font face gets shared and when we
+;; change the major mode in the indirect buffer it messes with the font in the
+;; base buffer (the one the user cares about). This tells emacs to not enable
+;; font locking in an indirect buffer for which the primary buffer has
+;; sqlup-mode enabled.
+(defadvice font-lock-mode (around sqlup-ignore-font-lock-on-indirect-buffer activate)
+  "Do not turn on jit-lock-mode on indirect buffers at all"
+  (unless (and (buffer-base-buffer)
+               (with-current-buffer (buffer-base-buffer)
+                 sqlup-mode))
+    ad-do-it))
+
 
 ;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
 ;; the sql product. We need to advice sql-set-product since sql-mode does not
