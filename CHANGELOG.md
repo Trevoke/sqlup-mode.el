@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### 0.6.0 (Jun 24, 2016)
+
+* Use `clone-indirect-buffer` instead of a temp buffer
+* Fix defect where the symbol before point was targeted by logic when enabling sqlup-mode
+* Improve docstrings
+
 ### 0.5.9 (Jun 8, 2016)
 
 * Support for upcasing within strings inside `EXECUTE format(`

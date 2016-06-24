@@ -5,8 +5,8 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.5.9
-;; Keywords: sql, tools
+;; Version: 0.6.0
+;; Keywords: sql, tools, redis, upcase
 
 ;;; License:
 
@@ -227,24 +227,22 @@ its major mode to sql-mode"
              (sql-mode)
              (current-buffer)))))
 
-;; Because we're using indirect buffers, the font face gets shared and when we
-;; change the major mode in the indirect buffer it messes with the font in the
-;; base buffer (the one the user cares about). This tells emacs to not enable
-;; font locking in an indirect buffer for which the primary buffer has
-;; sqlup-mode enabled.
 (defadvice font-lock-mode (around sqlup-ignore-font-lock-on-indirect-buffer activate)
-  "Do not turn on jit-lock-mode on indirect buffers at all"
+  "Do not turn on jit-lock-mode on indirect buffers at all.
+Because we're using indirect buffers, the font face gets shared and when we
+change the major mode in the indirect buffer it messes with the font in the
+base buffer (the one the user cares about). This tells emacs to not enable
+font locking in an indirect buffer for which the primary buffer has
+sqlup-mode enabled."
   (unless (and (buffer-base-buffer)
                (with-current-buffer (buffer-base-buffer)
                  sqlup-mode))
     ad-do-it))
 
-
-;; Advice sql-set-product, to invalidate sqlup's keyword cache after changing
-;; the sql product. We need to advice sql-set-product since sql-mode does not
-;; provide any hook that runs after changing the product
 (defadvice sql-set-product (after sqlup-invalidate-sqlup-keyword-cache activate)
-  "Invalidate sqlup-keyword cache after sql-product changes"
+  "Advice sql-set-product, to invalidate sqlup's keyword cache after changing
+the sql product. We need to advice sql-set-product since sql-mode does not
+provide any hook that runs after changing the product"
   (setq sqlup-local-keywords nil))
 
 (provide 'sqlup-mode)
