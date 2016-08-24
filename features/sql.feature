@@ -47,3 +47,7 @@ Feature: Upcasing SQL as I type
     And I execute the action chain
     And I type "select 'case "
     Then I should see "SELECT 'case "
+
+  Scenario: Normal strings with _ ending in a keyword are not upcased
+    When I type "select peer_group "
+    Then I should see "SELECT peer_group "
