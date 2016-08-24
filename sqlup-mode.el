@@ -145,7 +145,7 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
   "Return t if the code just before point ends with an eval keyword valid in
 the given DIALECT of SQL."
   (cl-some 'identity
-           (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
+           (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*") 0))
                    (cdr (assoc dialect sqlup-eval-keywords)))))
 
 (defun sqlup-in-eval-string-p (dialect)
