@@ -56,7 +56,8 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
+(require 'sql)
 
 (defconst sqlup-trigger-characters
   (mapcar 'string-to-char '(";"
@@ -90,7 +91,6 @@ figures out what is and isn't a keyword.")
   "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-work-buffer) nil)
   (set (make-local-variable 'sqlup-local-keywords) nil)
-  (set (make-local-variable 'sqlup-last-sql-keyword) nil)
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
@@ -144,9 +144,9 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
 (defun sqlup-match-eval-keyword-p (dialect)
   "Return t if the code just before point ends with an eval keyword valid in
 the given DIALECT of SQL."
-  (some 'identity
-        (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
-                (cdr (assoc dialect sqlup-eval-keywords)))))
+  (cl-some 'identity
+           (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
+                   (cdr (assoc dialect sqlup-eval-keywords)))))
 
 (defun sqlup-in-eval-string-p (dialect)
   "Return t if we are in an eval string."
@@ -199,7 +199,7 @@ ANSI SQL keywords."
       'ansi))
 
 (defun sqlup-redis-mode-p ()
-  (eq major-mode #'redis-mode))
+  (eq major-mode 'redis-mode))
 
 (defun sqlup-within-sql-buffer-p ()
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
