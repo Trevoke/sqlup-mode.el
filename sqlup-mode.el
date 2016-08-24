@@ -188,10 +188,15 @@ the given DIALECT of SQL."
   "Depending on the major mode (redis-mode or sql-mode), find the
 correct keywords. If not, create a (hopefully sane) default based on
 ANSI SQL keywords."
-  (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
+  (cond ((sqlup-redis-mode-p) (mapcar 'downcase (sqlup-get-redis-keywords)))
         ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
         (t (mapcar 'car (sql-add-product-keywords
                          (sqlup-valid-sql-product) '())))))
+
+(defun sqlup-get-redis-keywords ()
+  (if (boundp 'redis-keywords)
+      redis-keywords
+    '()))
 
 (defun sqlup-valid-sql-product ()
   (or (and (boundp 'sql-product)
