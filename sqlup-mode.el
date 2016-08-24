@@ -210,7 +210,7 @@ ANSI SQL keywords."
          (sqlup-term (car sqlup-terms)))
     (while (and (not sqlup-keyword-found)
                 sqlup-terms)
-      (setq sqlup-keyword-found (string-match sqlup-term word))
+      (setq sqlup-keyword-found (string-match (concat "^" sqlup-term "$") word))
       (setq sqlup-term (car sqlup-terms))
       (setq sqlup-terms (cdr sqlup-terms)))
     (and sqlup-keyword-found t)))
