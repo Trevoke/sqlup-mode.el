@@ -56,7 +56,8 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
+(require 'sql)
 
 (defconst sqlup-trigger-characters
   (mapcar 'string-to-char '(";"
@@ -90,7 +91,6 @@ figures out what is and isn't a keyword.")
   "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-work-buffer) nil)
   (set (make-local-variable 'sqlup-local-keywords) nil)
-  (set (make-local-variable 'sqlup-last-sql-keyword) nil)
   (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
@@ -144,9 +144,9 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
 (defun sqlup-match-eval-keyword-p (dialect)
   "Return t if the code just before point ends with an eval keyword valid in
 the given DIALECT of SQL."
-  (some 'identity
-        (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*")))
-                (cdr (assoc dialect sqlup-eval-keywords)))))
+  (cl-some 'identity
+           (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*") 0))
+                   (cdr (assoc dialect sqlup-eval-keywords)))))
 
 (defun sqlup-in-eval-string-p (dialect)
   "Return t if we are in an eval string."
@@ -188,10 +188,15 @@ the given DIALECT of SQL."
   "Depending on the major mode (redis-mode or sql-mode), find the
 correct keywords. If not, create a (hopefully sane) default based on
 ANSI SQL keywords."
-  (cond ((sqlup-redis-mode-p) (mapcar 'downcase redis-keywords))
+  (cond ((sqlup-redis-mode-p) (mapcar 'downcase (sqlup-get-redis-keywords)))
         ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
         (t (mapcar 'car (sql-add-product-keywords
                          (sqlup-valid-sql-product) '())))))
+
+(defun sqlup-get-redis-keywords ()
+  (if (boundp 'redis-keywords)
+      redis-keywords
+    '()))
 
 (defun sqlup-valid-sql-product ()
   (or (and (boundp 'sql-product)
@@ -199,7 +204,7 @@ ANSI SQL keywords."
       'ansi))
 
 (defun sqlup-redis-mode-p ()
-  (eq major-mode #'redis-mode))
+  (eq major-mode 'redis-mode))
 
 (defun sqlup-within-sql-buffer-p ()
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
