@@ -30,26 +30,17 @@ Feature: Upcasing SQL as I type
     Then I should see "SELECT COUNT(*) 'select' -- select "
 
  Scenario: Upcase a normal SQL keyword in a postgres-execute eval string
-    Given I start an action chain
-    And I press "M-x"
-    And I type "sql-highlight-postgres-keywords"
-    And I execute the action chain
+    When I use the sql product "postgres"
     And I type "execute 'select "
     Then I should see "EXECUTE 'SELECT "
 
  Scenario: Upcase a normal SQL keyword in a postgres-format eval string
-    Given I start an action chain
-    And I press "M-x"
-    And I type "sql-highlight-postgres-keywords"
-    And I execute the action chain
+    When I use the sql product "postgres"
     And I type "execute format('select "
     Then I should see "EXECUTE format('SELECT "
 
  Scenario: Normal strings are never upcased
-    Given I start an action chain
-    And I press "M-x"
-    And I type "sql-highlight-postgres-keywords"
-    And I execute the action chain
+    When I use the sql product "postgres"
     And I type "select 'case "
     Then I should see "SELECT 'case "
 
