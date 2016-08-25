@@ -5,6 +5,7 @@ Feature: Upcasing SQL as I type
 
   Background:
     Given the buffer is empty
+    And I turn on sql-mode
     And I turn on sqlup-mode
 
   Scenario: Upcase a normal SQL keyword after entering a space
