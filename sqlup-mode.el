@@ -210,15 +210,8 @@ ANSI SQL keywords."
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
 
 (defun sqlup-keyword-p (word)
-  (let* ((sqlup-keyword-found nil)
-         (sqlup-terms (sqlup-keywords-regexps))
-         (sqlup-term (car sqlup-terms)))
-    (while (and (not sqlup-keyword-found)
-                sqlup-terms)
-      (setq sqlup-keyword-found (string-match (concat "^" sqlup-term "$") word))
-      (setq sqlup-term (car sqlup-terms))
-      (setq sqlup-terms (cdr sqlup-terms)))
-    (and sqlup-keyword-found t)))
+  (cl-some (lambda (reg) (string-match-p (concat "^" reg "$") word))
+           (sqlup-keywords-regexps)))
 
 (defun sqlup-work-buffer ()
   "Returns and/or creates an indirect buffer based on current buffer and set
