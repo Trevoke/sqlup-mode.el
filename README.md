@@ -1,3 +1,5 @@
+Build status [<img src="https://secure.travis-ci.org/Trevoke/sqlup-mode.el.png" />](http://travis-ci.org/Trevoke/sqlup-mode.el)
+
 # sqlup-mode
 
 `sqlup-mode` is a minor mode for emacs. Its sole purpose is to make
