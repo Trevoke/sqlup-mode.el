@@ -12,6 +12,11 @@ Feature: Upcasing SQL as I type
     Given I type "select "
     Then I should see "SELECT "
 
+  Scenario: Upcase two keywords when typing
+    Given I type "select * from -- comment"
+    And I type " "
+    Then I should see "SELECT * FROM -- comment"
+
   Scenario: Upcase a normal SQL keyword after entering a (
     Given I type "count("
     Then I should see "COUNT("

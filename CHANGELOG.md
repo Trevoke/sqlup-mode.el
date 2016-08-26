@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### 0.6.1 (Aug 26, 2016)
+
+* Stop capitalizing words containing underscores which partially match a keyword
+* Set up Travis-CI
+*
+
 ### 0.6.0 (Jun 24, 2016)
 
 * Use `clone-indirect-buffer` instead of a temp buffer

@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.6.0
+;; Version: 0.6.1
 ;; Keywords: sql, tools, redis, upcase
 
 ;;; License:
