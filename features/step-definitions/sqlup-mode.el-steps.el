@@ -39,3 +39,10 @@
   (lambda (mode)
     (let ((v (vconcat [?\C-u ?\M-x] (string-to-vector mode) [?\C-m])))
 (execute-kbd-macro v))))
+
+(When "^I mock turn on sql-interactive-mode$"
+      "Turn on sql-interactive mode with process interaction functions mocked out"
+      (lambda ()
+        (cl-letf (((symbol-function 'set-process-sentinel) #'ignore)
+                  ((symbol-function 'get-buffer-process) #'ignore))
+          (sql-interactive-mode))))

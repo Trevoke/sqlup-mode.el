@@ -15,6 +15,7 @@
 (require 'espuds)
 (require 'sqlup-mode (f-expand "sqlup-mode.el" sqlup-mode-root-path))
 (require 'redis)
+(require 'cl-lib)
 
 (Setup
  ;; Before anything has run
