@@ -144,9 +144,8 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
 (defun sqlup-match-eval-keyword-p (dialect)
   "Return t if the code just before point ends with an eval keyword valid in
 the given DIALECT of SQL."
-  (cl-some 'identity
-           (mapcar #'(lambda (kw) (looking-back (concat kw "[\s\n\r\t]*") 0))
-                   (cdr (assoc dialect sqlup-eval-keywords)))))
+  (cl-some (lambda (kw) (looking-back (concat kw "\\s-*") 0))
+           (cdr (assoc dialect sqlup-eval-keywords))))
 
 (defun sqlup-in-eval-string-p (dialect)
   "Return t if we are in an eval string."
@@ -188,7 +187,7 @@ the given DIALECT of SQL."
   "Depending on the major mode (redis-mode or sql-mode), find the
 correct keywords. If not, create a (hopefully sane) default based on
 ANSI SQL keywords."
-  (cond ((sqlup-redis-mode-p) (mapcar 'downcase (sqlup-get-redis-keywords)))
+  (cond ((derived-mode-p 'redis-mode) (mapcar 'downcase (sqlup-get-redis-keywords)))
         ((sqlup-within-sql-buffer-p) (mapcar 'car sql-mode-font-lock-keywords))
         (t (mapcar 'car (sql-add-product-keywords
                          (sqlup-valid-sql-product) '())))))
@@ -203,22 +202,12 @@ ANSI SQL keywords."
            sql-product)
       'ansi))
 
-(defun sqlup-redis-mode-p ()
-  (eq major-mode 'redis-mode))
-
 (defun sqlup-within-sql-buffer-p ()
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
 
 (defun sqlup-keyword-p (word)
-  (let* ((sqlup-keyword-found nil)
-         (sqlup-terms (sqlup-keywords-regexps))
-         (sqlup-term (car sqlup-terms)))
-    (while (and (not sqlup-keyword-found)
-                sqlup-terms)
-      (setq sqlup-keyword-found (string-match (concat "^" sqlup-term "$") word))
-      (setq sqlup-term (car sqlup-terms))
-      (setq sqlup-terms (cdr sqlup-terms)))
-    (and sqlup-keyword-found t)))
+  (cl-some (lambda (reg) (string-match-p (concat "^" reg "$") word))
+           (sqlup-keywords-regexps)))
 
 (defun sqlup-work-buffer ()
   "Returns and/or creates an indirect buffer based on current buffer and set

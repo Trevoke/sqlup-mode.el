@@ -40,6 +40,11 @@
     (let ((v (vconcat [?\C-u ?\M-x] (string-to-vector mode) [?\C-m])))
 (execute-kbd-macro v))))
 
+(When "^I use the sql product \"\\(.+\\)\"$"
+      "Turns on some mode."
+      (lambda (product)
+        (sql-set-product (intern product))))
+
 (When "^I mock turn on sql-interactive-mode$"
       "Turn on sql-interactive mode with process interaction functions mocked out"
       (lambda ()
