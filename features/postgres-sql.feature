@@ -17,3 +17,7 @@ Feature: Postgres product specific tweaks
  Scenario: Normal strings are never upcased
     And I type "select 'case "
     Then I should see "SELECT 'case "
+
+  Scenario: Postgres meta commands are not upcased
+    When I type "\c "
+    Then I should see "\c "
