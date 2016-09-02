@@ -129,9 +129,13 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
 
 (defun sqlup-maybe-capitalize-symbol (direction)
   "DIRECTION is either 1 for forward or -1 for backward"
-  (forward-symbol direction)
-  (sqlup-work-on-symbol (thing-at-point 'symbol)
-                        (bounds-of-thing-at-point 'symbol)))
+  (with-syntax-table (make-syntax-table sql-mode-syntax-table)
+    ;; Give \ symbol syntax so that it is included when we get a symbol. This is
+    ;; needed so that \c in postgres is not treated as the keyword C.
+    (modify-syntax-entry ?\\ "_")
+    (forward-symbol direction)
+    (sqlup-work-on-symbol (thing-at-point 'symbol)
+                          (bounds-of-thing-at-point 'symbol))))
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
