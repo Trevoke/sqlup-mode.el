@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.6.2 (Sep 2, 2016)
+
+* \c is no longer capitalized in SQL-interactive mode for Postgres
+* Many thanks to David Shepherd (davidshepherd7 on Github) for all the improvements
+
 ### 0.6.1 (Aug 26, 2016)
 
 * Stop capitalizing words containing underscores which partially match a keyword
