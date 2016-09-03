@@ -59,6 +59,19 @@
 (require 'cl-lib)
 (require 'sql)
 
+
+;;; Customizable variables
+(defcustom sqlup-blacklist
+  '()
+  "List of words which should never be upcased
+
+The words must match the whole symbol. They are interpreted as plain
+strings not regexes."
+  :type '(repeat string)
+  :group 'sqlup)
+
+
+;;; Internal variables
 (defconst sqlup-trigger-characters
   (mapcar 'string-to-char '(";"
                             " "
@@ -78,6 +91,7 @@ this mode's logic will be evaluated.")
 (defvar sqlup-work-buffer nil
   "Buffer-local variable keeping track of the name of the buffer where sqlup
 figures out what is and isn't a keyword.")
+
 
 ;;;###autoload
 (define-minor-mode sqlup-mode
@@ -140,6 +154,7 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
            (sqlup-keyword-p (downcase symbol))
+           (not (sqlup-blacklisted-p (downcase symbol)))
            (sqlup-capitalizable-p (point)))
       (progn
         (upcase-region (car symbol-boundaries)
@@ -212,6 +227,10 @@ ANSI SQL keywords."
 (defun sqlup-keyword-p (word)
   (cl-some (lambda (reg) (string-match-p (concat "^" reg "$") word))
            (sqlup-keywords-regexps)))
+
+(defun sqlup-blacklisted-p (word)
+  (cl-some (lambda (blacklisted) (string-match-p (concat "^" (regexp-quote blacklisted) "$") word))
+           sqlup-blacklist))
 
 (defun sqlup-work-buffer ()
   "Returns and/or creates an indirect buffer based on current buffer and set
