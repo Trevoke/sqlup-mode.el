@@ -64,7 +64,7 @@
                             " "
                             "("
                             ","
-                            "''"))
+                            "'"))
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
 
