@@ -37,7 +37,7 @@ sqlup-mode is NOT YET on Marmalade.
 
 ## Usage
 
-### Setup
+### Basic setup
 
 Here follows an example setup to activate `sqlup-mode` automatically when entering sql-mode or sql-interactive-mode:
 
@@ -49,6 +49,18 @@ Here follows an example setup to activate `sqlup-mode` automatically when enteri
 ;; Set a global keyword to use sqlup on a region
 (global-set-key (kbd "C-c u") 'sqlup-capitalize-keywords-in-region)
 ```
+
+### Blacklisting words
+
+Sqlup can be configured to ignore certain keywords by adding them to the list
+`sqlup-blacklist`. For example if you use `name` as a column name it would be
+annoying to have it upcased so you can prevent this by adding
+
+```lisp
+(add-to-list 'sqlup-blacklist "name")
+```
+
+to your config (or do the equivalent through the `M-x customize` interface).
 
 ### Normal typing (e.g. SQL REPL)
 
