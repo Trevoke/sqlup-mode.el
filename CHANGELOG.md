@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.7.0 (Sep 4, 2016)
+
+* Add a list of words that can be excluded (sqlup-blacklist)
+* Keyboard macros no longer break sqlup-mode
+
 ### 0.6.2 (Sep 2, 2016)
 
 * \c is no longer capitalized in SQL-interactive mode for Postgres
