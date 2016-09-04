@@ -64,7 +64,7 @@
                             " "
                             "("
                             ","
-                            "''"))
+                            "'"))
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
 
@@ -117,14 +117,14 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
 
 (defun sqlup-user-pressed-return-p ()
   (and (< 0 (length (this-command-keys-vector)))
-       (or (equal 13 (elt (this-command-keys-vector) 0))
-           (equal 10 (elt (this-command-keys-vector) 0)))))
+       (or (equal 13 last-command-event)
+           (equal 10 last-command-event))))
 
 (defun sqlup-user-is-typing-p ()
   (eq this-command #'self-insert-command))
 
 (defun sqlup-trigger-self-insert-character-p ()
-  (let ((sqlup-current-char (elt (this-command-keys-vector) 0)))
+  (let ((sqlup-current-char last-command-event))
     (member sqlup-current-char sqlup-trigger-characters)))
 
 (defun sqlup-maybe-capitalize-symbol (direction)

@@ -32,3 +32,8 @@ Feature: Upcasing SQL as I type
   Scenario: Normal strings with _ ending in a keyword are not upcased
     When I type "select peer_group "
     Then I should see "SELECT peer_group "
+
+  Scenario: Typing newlines should upcase strings
+    When I type "select"
+    When I type a newline
+    Then I should see "SELECT"
