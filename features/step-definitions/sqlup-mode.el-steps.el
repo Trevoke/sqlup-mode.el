@@ -51,3 +51,8 @@
         (cl-letf (((symbol-function 'set-process-sentinel) #'ignore)
                   ((symbol-function 'get-buffer-process) #'ignore))
           (sql-interactive-mode))))
+
+(When "I type a newline"
+      "Simulate typing a newline character"
+      (lambda ()
+        (execute-kbd-macro (string-to-vector "\n"))))

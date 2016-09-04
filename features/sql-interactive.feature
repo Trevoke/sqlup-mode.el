@@ -12,3 +12,8 @@ Feature: Upcasing SQL as I type in SQL interactive mode
   Scenario: keywords in strings and comments do not get upcased
     Given I type "select count(*) 'select' -- select "
     Then I should see "SELECT COUNT(*) 'select' -- select "
+
+  Scenario: Typing newlines should upcase strings
+    When I type "select"
+    When I type a newline
+    Then I should see "SELECT"
