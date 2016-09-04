@@ -37,3 +37,13 @@ Feature: Upcasing SQL as I type
     When I type "select"
     When I type a newline
     Then I should see "SELECT"
+
+ Scenario: Blacklisted words should never be upcased
+    When I set sqlup-blacklist to ("user" "name")
+    When I type "select user, name from d"
+    Then I should see "SELECT user, name FROM d"
+
+ Scenario: The blacklist is case insensitive
+    When I set sqlup-blacklist to ("USER")
+    When I type "select user from d"
+    Then I should see "SELECT user FROM d"
