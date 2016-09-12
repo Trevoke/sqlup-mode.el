@@ -164,23 +164,16 @@ Other than <RET>, characters are in variable sqlup-trigger-characters."
            (sqlup-keyword-p (downcase symbol))
            (not (sqlup-blacklisted-p (downcase symbol)))
            (sqlup-capitalizable-p (point)))
-      (progn
-        (upcase-region (car symbol-boundaries)
-                       (cdr symbol-boundaries)))))
+      (upcase-region (car symbol-boundaries)
+                     (cdr symbol-boundaries))))
 
-(defun sqlup-match-eval-keyword-p (dialect)
-  "Return t if the code just before point ends with an eval keyword valid in
-the given DIALECT of SQL."
-  (cl-some (lambda (kw) (looking-back (concat kw "\\s-*") 0))
-           (cdr (assoc dialect sqlup-eval-keywords))))
+(defun sqlup-keyword-p (word)
+  (cl-some (lambda (reg) (string-match-p (concat "^" reg "$") word))
+           (sqlup-keywords-regexps)))
 
-(defun sqlup-in-eval-string-p (dialect)
-  "Return t if we are in an eval string."
-  (save-excursion
-    (if (sqlup-string-p)
-        (progn
-          (goto-char (nth 8 (syntax-ppss)))
-          (sqlup-match-eval-keyword-p dialect)))))
+(defun sqlup-blacklisted-p (word)
+  (cl-some (lambda (blacklisted) (string-match-p (concat "^" (regexp-quote blacklisted) "$") word))
+           sqlup-blacklist))
 
 (defun sqlup-capitalizable-p (point-location)
   (let ((dialect (sqlup-valid-sql-product)))
@@ -192,6 +185,20 @@ the given DIALECT of SQL."
 
 (defun sqlup-comment-p ()
   (and (nth 4 (syntax-ppss)) t))
+
+(defun sqlup-in-eval-string-p (dialect)
+  "Return t if we are in an eval string."
+  (save-excursion
+    (if (sqlup-string-p)
+        (progn
+          (goto-char (nth 8 (syntax-ppss)))
+          (sqlup-match-eval-keyword-p dialect)))))
+
+(defun sqlup-match-eval-keyword-p (dialect)
+  "Return t if the code just before point ends with an eval keyword valid in
+the given DIALECT of SQL."
+  (cl-some (lambda (kw) (looking-back (concat kw "\\s-*") 0))
+           (cdr (assoc dialect sqlup-eval-keywords))))
 
 (defun sqlup-string-p ()
   (and (nth 3 (syntax-ppss)) t))
@@ -231,14 +238,6 @@ ANSI SQL keywords."
 
 (defun sqlup-within-sql-buffer-p ()
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
-
-(defun sqlup-keyword-p (word)
-  (cl-some (lambda (reg) (string-match-p (concat "^" reg "$") word))
-           (sqlup-keywords-regexps)))
-
-(defun sqlup-blacklisted-p (word)
-  (cl-some (lambda (blacklisted) (string-match-p (concat "^" (regexp-quote blacklisted) "$") word))
-           sqlup-blacklist))
 
 (defun sqlup-work-buffer ()
   "Returns and/or creates an indirect buffer based on current buffer and set
