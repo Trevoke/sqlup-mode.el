@@ -19,6 +19,7 @@
 
 (Setup
  ;; Before anything has run
+ (setq inhibit-message t) ;; Do not log out that minor mode is enabled/disabled (or other calls to (message) )
  )
 
 (Before
@@ -31,4 +32,5 @@
 
 (Teardown
  ;; After when everything has been run
+ (setq inhibit-message nil)
  )
