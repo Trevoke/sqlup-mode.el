@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.7.1 (Dec 7, 2016)
+
+* If major mode is sql-mode, do not create indirect buffer, just use it directly (#48)
+* This also fixes a problem with font-lock mode breaking when sqlup-mode is disabled (#63)
+
 ### 0.7.0 (Sep 4, 2016)
 
 * Add a list of words that can be excluded (sqlup-blacklist)
