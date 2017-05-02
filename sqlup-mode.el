@@ -68,7 +68,6 @@
 (require 'sql)
 
 
-;;; Customizable variables
 (defcustom sqlup-blacklist
   '()
   "List of words which should never be upcased
@@ -79,7 +78,6 @@ strings not regexes."
   :group 'sqlup)
 
 
-;;; Internal variables
 (defconst sqlup-trigger-characters
   (mapcar 'string-to-char '(";"
                             " "
