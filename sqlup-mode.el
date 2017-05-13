@@ -248,5 +248,11 @@ the sql product. We need to advice sql-set-product since sql-mode does not
 provide any hook that runs after changing the product"
   (setq sqlup-local-keywords nil))
 
+(defadvice comint-send-input (before sqlup-capitalize-sent-input activate)
+  "Capitalize any sql keywords before point when sending input in
+  interactive sql"
+  (when sqlup-mode
+    (save-excursion (sqlup-maybe-capitalize-symbol -1))))
+
 (provide 'sqlup-mode)
 ;;; sqlup-mode.el ends here

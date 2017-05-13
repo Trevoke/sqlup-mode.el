@@ -15,5 +15,5 @@ Feature: Upcasing SQL as I type in SQL interactive mode
 
   Scenario: Typing newlines in the prompt should upcase strings
     When I type "select"
-    When I type a newline
+    When I press "RET" with missing buffer error ignored
     Then I should see "SELECT"
