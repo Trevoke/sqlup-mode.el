@@ -18,3 +18,10 @@ Feature: Playing well with emacs
     When I type "end"
     And I turn on sqlup-mode
     Then I should see "end"
+
+  Scenario: Not modifying text when enabling sqlup-mode
+    Given I add sqlup-mode to sql-mode hook
+    Given I turn on text-mode
+    When I type "select"
+    And I turn on sql-mode
+    Then I should see "select"

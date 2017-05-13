@@ -56,3 +56,7 @@
       "Simulate typing a newline character"
       (lambda ()
         (execute-kbd-macro (string-to-vector "\n"))))
+
+(Given "^I add sqlup-mode to sql-mode hook$"
+       (lambda ()
+         (add-hook 'sql-mode-hook 'sqlup-mode)))

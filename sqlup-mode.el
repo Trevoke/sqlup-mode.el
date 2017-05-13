@@ -83,6 +83,7 @@ strings not regexes."
                             " "
                             "("
                             ","
+                            "\n"
                             "'"))
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
@@ -111,41 +112,18 @@ figures out what is and isn't a keyword.")
   "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-work-buffer) nil)
   (set (make-local-variable 'sqlup-local-keywords) nil)
-  (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
+  (add-hook 'post-self-insert-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
   "Remove buffer-local hook to handle this mode's logic"
   (if sqlup-work-buffer (kill-buffer sqlup-work-buffer))
-  (remove-hook 'post-command-hook 'sqlup-capitalize-as-you-type t))
+  (remove-hook 'post-self-insert-hook 'sqlup-capitalize-as-you-type t))
 
 (defun sqlup-capitalize-as-you-type ()
   "If the user typed a trigger key, check if we should capitalize
 the previous word."
-  (if (sqlup-should-do-work-p)
+  (if (member last-command-event sqlup-trigger-characters)
       (save-excursion (sqlup-maybe-capitalize-symbol -1))))
-
-(defun sqlup-should-do-work-p ()
-  "Checks whether the user pressed one of the trigger keys.
-Other than <RET>, characters are in variable sqlup-trigger-characters."
-  (and (sqlup-not-just-initialized-p)
-       (or (sqlup-user-pressed-return-p)
-           (and (sqlup-user-is-typing-p)
-                (sqlup-trigger-self-insert-character-p)))))
-
-(defun sqlup-not-just-initialized-p ()
-  (not (eq this-command 'sqlup-mode)))
-
-(defun sqlup-user-pressed-return-p ()
-  (and (< 0 (length (this-command-keys-vector)))
-       (or (equal 13 last-command-event)
-           (equal 10 last-command-event))))
-
-(defun sqlup-user-is-typing-p ()
-  (eq this-command #'self-insert-command))
-
-(defun sqlup-trigger-self-insert-character-p ()
-  (let ((sqlup-current-char last-command-event))
-    (member sqlup-current-char sqlup-trigger-characters)))
 
 (defun sqlup-maybe-capitalize-symbol (direction)
   "DIRECTION is either 1 for forward or -1 for backward"
