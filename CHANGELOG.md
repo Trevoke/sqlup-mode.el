@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.7.2 (May 21, 2017)
+
+* Fix a bug where opening a buffer with sqlup-mode as a hook might upcase the first word accidentally
+
 ### 0.7.1 (Dec 7, 2016)
 
 * If major mode is sql-mode, do not create indirect buffer, just use it directly (#48)
