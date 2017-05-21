@@ -56,3 +56,12 @@
       "Simulate typing a newline character"
       (lambda ()
         (execute-kbd-macro (string-to-vector "\n"))))
+
+(Given "^I add sqlup-mode to sql-mode hook$"
+       (lambda ()
+         (add-hook 'sql-mode-hook 'sqlup-mode)))
+
+(When "^I press \"\\([^\"]+\\)\" with missing buffer error ignored$"
+      (lambda (arg)
+        (ignore-errors
+          (When "I press \"%s\"" arg))))

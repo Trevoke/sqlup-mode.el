@@ -13,7 +13,7 @@ Feature: Upcasing SQL as I type in SQL interactive mode
     Given I type "select count(*) 'select' -- select "
     Then I should see "SELECT COUNT(*) 'select' -- select "
 
-  Scenario: Typing newlines should upcase strings
+  Scenario: Typing newlines in the prompt should upcase strings
     When I type "select"
-    When I type a newline
+    When I press "RET" with missing buffer error ignored
     Then I should see "SELECT"
