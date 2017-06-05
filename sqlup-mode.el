@@ -188,6 +188,14 @@ the given DIALECT of SQL."
     (while (< (point) end-pos)
       (sqlup-maybe-capitalize-symbol 1))))
 
+(defun sqlup-capitalize-keywords-in-buffer ()
+  "Call this function in a buffer to capitalize the SQL keywords therein."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (< (point) (point-max))
+      (sqlup-maybe-capitalize-symbol 1))))
+
 (defun sqlup-keywords-regexps ()
   (or sqlup-local-keywords
       (set (make-local-variable 'sqlup-local-keywords)
