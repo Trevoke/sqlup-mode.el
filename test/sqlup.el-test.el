@@ -14,3 +14,10 @@
     (set-mark (point-min))
     (call-interactively 'sqlup-capitalize-keywords-in-region)
     (should (equal (buffer-string) "SELECT COUNT(*) FROM 'select' -- select"))))
+
+(ert-deftest upcase-a-region ()
+  (with-temp-buffer
+    (sql-mode)
+    (insert "select count(*) from 'select' -- select")
+    (call-interactively 'sqlup-capitalize-keywords-in-buffer)
+    (should (equal (buffer-string) "SELECT COUNT(*) FROM 'select' -- select"))))
