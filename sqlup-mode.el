@@ -192,9 +192,7 @@ the given DIALECT of SQL."
   "Call this function in a buffer to capitalize the SQL keywords therein."
   (interactive)
   (save-excursion
-    (goto-char (point-min))
-    (while (< (point) (point-max))
-      (sqlup-maybe-capitalize-symbol 1))))
+    (sqlup-capitalize-keywords-in-region (point-min) (point-max))))
 
 (defun sqlup-keywords-regexps ()
   (or sqlup-local-keywords

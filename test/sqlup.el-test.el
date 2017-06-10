@@ -1,4 +1,3 @@
-
 (ert-deftest upcase-select ()
   "Will upcase the word 'select' if it sees it"
   (with-temp-buffer
@@ -15,7 +14,7 @@
     (call-interactively 'sqlup-capitalize-keywords-in-region)
     (should (equal (buffer-string) "SELECT COUNT(*) FROM 'select' -- select"))))
 
-(ert-deftest upcase-a-region ()
+(ert-deftest upcase-a-buffer ()
   (with-temp-buffer
     (sql-mode)
     (insert "select count(*) from 'select' -- select")
