@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.8.0 (Jun 10, 2017)
+
+* Add function sqlup-capitalize-keywords-in-buffer
+
 ### 0.7.2 (May 21, 2017)
 
 * Fix a bug where opening a buffer with sqlup-mode as a hook might upcase the first word accidentally

@@ -5,7 +5,7 @@
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
 ;; Created: Jun 25 2014
-;; Version: 0.7.2
+;; Version: 0.8.0
 ;; Keywords: sql, tools, redis, upcase
 
 ;;; License:
@@ -38,9 +38,11 @@
 ;; * '
 ;;
 ;; This package also provides a function to capitalize SQL keywords inside a
-;; region - always available, no need to activate the minor mode to use it:
+;; region as well as the whole bufer - always available, no need to activate 
+;; the minor mode to use it:
 ;;
 ;; M-x sqlup-capitalize-keywords-in-region
+;; M-x sqlup-capitalize-keywords-in-buffer
 ;;
 ;; It is not bound to a keybinding. Here is an example of how you could do it:
 ;;

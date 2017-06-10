@@ -78,6 +78,9 @@ typing. The minor mode will be triggered by the following keys:
 Select a region and just call `M-x sqlup-capitalize-keywords-in-region`.
 Magic.
 
+### Work with a whole buffer
+
+Just call `M-x sqlup-capitalize-keywords-in-buffer`.
 
 ## Implementation choices
 
