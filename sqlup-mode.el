@@ -1,4 +1,4 @@
-;;; sqlup-mode.el --- Upcase SQL words for you
+;;; sqlup-mode.el --- Upcase SQL words for you  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 Aldric Giacomoni
 
@@ -134,8 +134,10 @@ the previous word."
     ;; needed so that \c in postgres is not treated as the keyword C.
     (modify-syntax-entry ?\\ "_")
     (forward-symbol direction)
-    (sqlup-work-on-symbol (thing-at-point 'symbol)
-                          (bounds-of-thing-at-point 'symbol))))
+    (let ((bnds (bounds-of-thing-at-point 'symbol)))
+      (when (and bnds (not (eq ?. (char-before (car bnds))))) 
+        (sqlup-work-on-symbol
+         (buffer-substring-no-properties (car bnds) (cdr bnds)) bnds)))))
 
 (defun sqlup-work-on-symbol (symbol symbol-boundaries)
   (if (and symbol
@@ -224,7 +226,9 @@ ANSI SQL keywords."
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
 
 (defun sqlup-work-buffer ()
-  "Determines in which buffer sqlup will look to find what it needs and returns it. It can return the current buffer or create and return an indirect buffer based on current buffer and set its major mode to sql-mode."
+  "Determines in which buffer sqlup will look to find what it needs and
+returns it. It can return the current buffer or create and return an
+indirect buffer based on current buffer and set its major mode to sql-mode."
   (cond ((sqlup-within-sql-buffer-p) (current-buffer))
         (t (sqlup-indirect-buffer))))
 
